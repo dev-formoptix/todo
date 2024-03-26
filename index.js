@@ -2,6 +2,12 @@ const mysql = require('mysql');
 const express = require('express');
 const bodyParser = require('body-parser');
 const SqlString = require('sqlstring');
+const RateLimit = require('express-rate-limit');
+
+const limiter = RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max 100 requests per windowMs
+});
 
 /**
  * @param {string} code The code to evaluate
@@ -10,9 +16,6 @@ const SqlString = require('sqlstring');
 function evaluateCode(code) {
     return eval(code); // Alert: Avoid using eval() function
 }
-
-// Example usage triggering the alert
-evaluateCode("2 + 2");
 
 const app = express();
 
@@ -29,6 +32,9 @@ connection.connect();
 
 // Middleware to parse JSON requests
 app.use(bodyParser.json());
+
+// Apply rate limiter to all requests
+app.use(limiter);
 
 // Endpoint to authenticate user
 app.post('/login', (req, res) => {
