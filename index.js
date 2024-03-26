@@ -1,6 +1,7 @@
 const mysql = require('mysql');
 const express = require('express');
 const bodyParser = require('body-parser');
+const RateLimit = require('express-rate-limit');
 
 /**
  * @param {string} code The code to evaluate
@@ -25,6 +26,15 @@ connection.connect();
 
 // Middleware to parse JSON requests
 app.use(bodyParser.json());
+
+// Set up rate limiter: maximum of 100 requests per 15 minutes
+const limiter = RateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+});
+
+// Apply rate limiter to all requests
+app.use(limiter);
 
 // Endpoint to authenticate user
 app.post('/login', (req, res) => {
