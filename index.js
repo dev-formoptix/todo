@@ -1,17 +1,12 @@
 const mysql = require('mysql');
 const express = require('express');
 const bodyParser = require('body-parser');
-/**
- * @param {string} code The code to evaluate
- * @returns {*} The result of the evaluation
- */
+const rateLimit = require('express-rate-limit');
+
 function evaluateCode(code) {
-    return eval(code); // Alert: Avoid using eval() function
-  }
-  
-  // Example usage triggering the alert
-  evaluateCode("2 + 2");
-  
+  return eval(code); // Alert: Avoid using eval() function
+}
+
 const app = express();
 
 // Create connection to MySQL database
@@ -27,6 +22,15 @@ connection.connect();
 
 // Middleware to parse JSON requests
 app.use(bodyParser.json());
+
+// Set up rate limiter: maximum of five requests per minute
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // max 100 requests per windowMs
+});
+
+// Apply rate limiter to all requests
+app.use(limiter);
 
 // Endpoint to authenticate user
 app.post('/login', (req, res) => {
