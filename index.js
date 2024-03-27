@@ -1,10 +1,13 @@
-Here is the updated code with the vulnerability fixed:
+In addition to fixing the SQL injection vulnerability, we can also add rate limiting to the `/login` endpoint to prevent denial-of-service attacks. 
+
+Here is the updated code with rate limiting implemented:
 
 ```javascript
 const mysql = require('mysql');
 const express = require('express');
 const bodyParser = require('body-parser');
 const SqlString = require('sqlstring');
+const rateLimit = require('express-rate-limit');
 
 /**
  * @param {string} code The code to evaluate
@@ -30,11 +33,17 @@ const connection = mysql.createConnection({
 // Connect to MySQL database
 connection.connect();
 
+// Rate limiting middleware
+const loginRateLimit = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // max 100 requests per windowMs
+});
+
 // Middleware to parse JSON requests
 app.use(bodyParser.json());
 
 // Endpoint to authenticate user
-app.post('/login', (req, res) => {
+app.post('/login', loginRateLimit, (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
 
@@ -65,6 +74,8 @@ app.listen(port, () => {
 ```
 
 In the updated code:
-- The `SqlString` library is imported to escape the user input before embedding it into the query string.
-- The SQL query is changed to use query parameters instead of directly concatenating the user input.
-- The user input is supplied as an array of values to the `connection.query` method, ensuring the query is safe from SQL injection attacks.
+- The `express-rate-limit` package is imported and used to create a rate limiter middleware called `loginRateLimit`.
+- The `loginRateLimit` middleware is applied to the `/login` endpoint to limit the rate at which requests can be made to this endpoint.
+- The `windowMs` option is set to 15 minutes, meaning that only a certain number of requests can be made within a 15-minute window.
+- The `max` option is set to 100, allowing a maximum of 100 requests per 15-minute window.
+- The `loginRateLimit` middleware is added as a second parameter to the `/login` route handler, ensuring that rate limiting is applied to this endpoint.
