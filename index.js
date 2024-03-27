@@ -2,6 +2,9 @@ const mysql = require('mysql');
 const express = require('express');
 const bodyParser = require('body-parser');
 const rateLimit = require('express-rate-limit');
+const dotenv = require('dotenv');
+
+dotenv.config(); // Load environment variables from .env file
 
 /**
  * @param {string} code The code to evaluate
@@ -14,8 +17,8 @@ function evaluateCode(code) {
 // Create connection to MySQL database
 const connection = mysql.createConnection({
   host: 'localhost',
-  user: 'root',
-  password: 'password',
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
   database: 'mydatabase'
 });
 
