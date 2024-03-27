@@ -1,6 +1,7 @@
 const mysql = require('mysql');
 const express = require('express');
 const bodyParser = require('body-parser');
+const rateLimit = require('express-rate-limit');
 
 /**
  * @param {string} code The code to evaluate
@@ -22,7 +23,16 @@ const connection = mysql.createConnection({
 connection.connect();
 
 // Middleware to parse JSON requests
+const app = express();
 app.use(bodyParser.json());
+
+// Limit requests to prevent DoS attacks
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max 100 requests per windowMs
+});
+
+app.use(limiter);
 
 // Endpoint to authenticate user
 app.post('/login', (req, res) => {
@@ -49,7 +59,6 @@ app.post('/login', (req, res) => {
 });
 
 // Start the server
-const app = express();
 const port = 3000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
