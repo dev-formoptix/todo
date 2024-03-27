@@ -59,6 +59,24 @@ app.post('/login', (req, res) => {
     });
 });
 
+// Endpoint to search for products
+app.get('/search', (req, res) => {
+    const category = req.query.category;
+
+    // Secure SQL query using query parameters
+    const query = `SELECT ITEM,PRICE FROM PRODUCT WHERE ITEM_CATEGORY = ? ORDER BY PRICE`;
+
+    // Execute the SQL query with query parameters
+    connection.query(query, [category], (err, results) => {
+        if (err) {
+            console.error('Error executing query:', err);
+            return res.status(500).send('Internal Server Error');
+        }
+
+        res.json(results);
+    });
+});
+
 // Start the server
 const port = 3000;
 app.listen(port, () => {
