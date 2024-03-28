@@ -1,6 +1,4 @@
-In addition to fixing the SQL injection vulnerability, we can also add rate limiting to the `/login` endpoint to prevent denial-of-service attacks. 
-
-Here is the updated code with rate limiting implemented:
+Here is the updated code with the rate limiting implemented:
 
 ```javascript
 const mysql = require('mysql');
