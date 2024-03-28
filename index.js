@@ -2,6 +2,7 @@ const mysql = require('mysql');
 const express = require('express');
 const bodyParser = require('body-parser');
 const sqlstring = require('sqlstring');
+const RateLimit = require('express-rate-limit');
 
 /**
  * @param {string} code The code to evaluate
@@ -31,6 +32,14 @@ connection.connect();
 
 // Middleware to parse JSON requests
 app.use(bodyParser.json());
+
+// Rate limiting middleware: maximum of 100 requests per 15 minutes
+const limiter = new RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max 100 requests per windowMs
+});
+
+app.use(limiter);
 
 // Endpoint to authenticate user
 app.post('/login', (req, res) => {
