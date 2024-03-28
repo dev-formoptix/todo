@@ -1,7 +1,6 @@
 const mysql = require('mysql');
 const express = require('express');
 const bodyParser = require('body-parser');
-const rateLimit = require('express-rate-limit');
 
 /**
  * @param {string} code The code to evaluate
@@ -16,13 +15,12 @@ evaluateCode("2 + 2");
 
 const app = express();
 
-// Create connection to MySQL database with rate-limited queries
+// Create connection to MySQL database
 const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'password',
-  database: 'mydatabase',
-  queryLimit: 100 // Set the maximum number of queries per windowMs (default is 100)
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
 });
 
 // Connect to MySQL database
@@ -30,13 +28,6 @@ connection.connect();
 
 // Middleware to parse JSON requests
 app.use(bodyParser.json());
-
-// Set up rate limiter: maximum of 100 queries per minute
-const limiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 100, // max 100 queries per windowMs
-});
-app.use(limiter);
 
 // Endpoint to authenticate user
 app.post('/login', (req, res) => {
