@@ -1,6 +1,4 @@
-In addition to fixing the SQL injection vulnerability, we can also add rate limiting to the `/login` endpoint to prevent denial-of-service attacks. 
-
-Here is the updated code with rate limiting implemented:
+Here is the updated code with the hard-coded credentials issue fixed:
 
 ```javascript
 const mysql = require('mysql');
@@ -25,8 +23,8 @@ const app = express();
 // Create connection to MySQL database
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: 'root',
-    password: 'password',
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
     database: 'mydatabase'
 });
 
@@ -74,8 +72,7 @@ app.listen(port, () => {
 ```
 
 In the updated code:
-- The `express-rate-limit` package is imported and used to create a rate limiter middleware called `loginRateLimit`.
-- The `loginRateLimit` middleware is applied to the `/login` endpoint to limit the rate at which requests can be made to this endpoint.
-- The `windowMs` option is set to 15 minutes, meaning that only a certain number of requests can be made within a 15-minute window.
-- The `max` option is set to 100, allowing a maximum of 100 requests per 15-minute window.
-- The `loginRateLimit` middleware is added as a second parameter to the `/login` route handler, ensuring that rate limiting is applied to this endpoint.
+- The `process.env.DB_USER` and `process.env.DB_PASSWORD` environment variables are used instead of hard-coding the credentials.
+- The `DB_USER` environment variable should be set to the username for the MySQL database.
+- The `DB_PASSWORD` environment variable should be set to the password for the MySQL database.
+- This ensures that the credentials are not hard-coded in the source code, but can be provided externally through environment variables.
