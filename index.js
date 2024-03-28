@@ -1,24 +1,25 @@
 const mysql = require('mysql');
 const express = require('express');
 const bodyParser = require('body-parser');
+
 /**
  * @param {string} code The code to evaluate
  * @returns {*} The result of the evaluation
  */
 function evaluateCode(code) {
     return eval(code); // Alert: Avoid using eval() function
-  }
-  
-  // Example usage triggering the alert
-  evaluateCode("2 + 2");
-  
+}
+
+// Example usage triggering the alert
+evaluateCode("2 + 2");
+
 const app = express();
 
 // Create connection to MySQL database
 const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'password',
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || 'password',
   database: 'mydatabase'
 });
 
@@ -52,7 +53,7 @@ app.post('/login', (req, res) => {
 });
 
 // Start the server
-const port = 3000;
+const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
