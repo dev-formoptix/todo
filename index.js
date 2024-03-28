@@ -15,12 +15,14 @@ function evaluateCode(code) {
 evaluateCode("2 + 2");
 
 const app = express();
+const username = process.env.DB_USERNAME;
+const password = process.env.DB_PASSWORD;
 
 // Create connection to MySQL database
 const connection = mysql.createConnection({
   host: 'localhost',
-  user: 'root',
-  password: 'password',
+  user: username,
+  password: password,
   database: 'mydatabase'
 });
 
