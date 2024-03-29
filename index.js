@@ -1,21 +1,7 @@
 const mysql = require('mysql');
 const express = require('express');
 const bodyParser = require('body-parser');
-
 const RateLimit = require('express-rate-limit');
-
-
-/**
- * @param {string} code The code to evaluate
- * @returns {*} The result of the evaluation
- */
-function evaluateCode(code) {
-  return eval(code); // Alert: Avoid using eval() function
-}
-
-// Example usage triggering the alert
-evaluateCode("2 + 2");
-
 const app = express();
 const username = process.env.DB_USERNAME;
 const password = process.env.DB_PASSWORD;
