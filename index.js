@@ -1,19 +1,17 @@
 const mysql = require('mysql');
 const express = require('express');
 const bodyParser = require('body-parser');
-const sqlstring = require('sqlstring');
-
 /**
  * @param {string} code The code to evaluate
  * @returns {*} The result of the evaluation
  */
 function evaluateCode(code) {
-  return eval(code); // Alert: Avoid using eval() function
-}
-
-// Example usage triggering the alert
-evaluateCode("2 + 2");
-
+    return eval(code); // Alert: Avoid using eval() function
+  }
+  
+  // Example usage triggering the alert
+  evaluateCode("2 + 2");
+  
 const app = express();
 
 // Create connection to MySQL database
@@ -35,10 +33,10 @@ app.post('/login', (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
 
-  // Use query parameters to avoid SQL injection
-  const query = sqlstring.format('SELECT * FROM users WHERE username = ? AND password = ?', [username, password]);
+  // Vulnerable SQL query susceptible to SQL injection
+  const query = `SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`;
 
-  // Execute the SQL query with query parameters
+  // Execute the SQL query
   connection.query(query, (err, results) => {
     if (err) {
       console.error('Error executing query:', err);
