@@ -4,7 +4,6 @@ const bodyParser = require('body-parser');
 
 const RateLimit = require('express-rate-limit');
 
-
 /**
  * @param {string} code The code to evaluate
  * @returns {*} The result of the evaluation
@@ -62,6 +61,25 @@ app.post('/login', (req, res) => {
     } else {
       res.status(401).send('Invalid username or password');
     }
+  });
+});
+
+// Endpoint to search for a product
+app.get('/search', (req, res) => {
+  const category = req.query.category;
+
+  // Safe SQL query using query parameters
+  const query = `SELECT ITEM, PRICE FROM PRODUCT WHERE ITEM_CATEGORY = ? ORDER BY PRICE`;
+  const values = [category];
+
+  // Execute the SQL query with query parameters
+  connection.query(query, values, (err, results) => {
+    if (err) {
+      console.error('Error executing query:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    res.send(results);
   });
 });
 
