@@ -1,6 +1,7 @@
 const mysql = require('mysql');
 const express = require('express');
 const bodyParser = require('body-parser');
+const sqlstring = require('sqlstring');
 
 /**
  * @param {string} code The code to evaluate
@@ -35,10 +36,10 @@ app.post('/login', (req, res) => {
   const password = req.body.password;
 
   // Use query parameters to avoid SQL injection
-  const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
+  const query = sqlstring.format('SELECT * FROM users WHERE username = ? AND password = ?', [username, password]);
 
   // Execute the SQL query with query parameters
-  connection.query(query, [username, password], (err, results) => {
+  connection.query(query, (err, results) => {
     if (err) {
       console.error('Error executing query:', err);
       return res.status(500).send('Internal Server Error');
