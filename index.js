@@ -1,9 +1,8 @@
 const mysql = require('mysql');
 const express = require('express');
 const bodyParser = require('body-parser');
-
 const RateLimit = require('express-rate-limit');
-
+const SqlString = require('sqlstring'); // Import the sqlstring library
 
 /**
  * @param {string} code The code to evaluate
