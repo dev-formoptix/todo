@@ -1,6 +1,7 @@
 const mysql = require('mysql');
 const express = require('express');
 const bodyParser = require('body-parser');
+const sqlstring = require('sqlstring');
 
 /**
  * @param {string} code The code to evaluate
