@@ -39,6 +39,25 @@ const limiter = RateLimit({
 // Apply rate limiter to all requests
 app.use(limiter);
 
+// Middleware to limit expensive operations
+app.use((req, res, next) => {
+  if (req.originalUrl === '/login') {
+    // Allow unlimited requests for login route
+    next();
+  } else {
+    // Limit requests for other routes
+    if (expensiveOperationInProgress) {
+      return res.status(429).send('Too Many Requests');
+    } else {
+      expensiveOperationInProgress = true;
+      setTimeout(() => {
+        expensiveOperationInProgress = false;
+        next();
+      }, 500); // Adjust the timeout as per the actual time taken by the expensive operation
+    }
+  }
+});
+
 // Endpoint to authenticate user
 app.post('/login', (req, res) => {
   const username = req.body.username;
