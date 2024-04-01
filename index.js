@@ -1,6 +1,7 @@
 const mysql = require('mysql');
 const express = require('express');
 const bodyParser = require('body-parser');
+const rateLimit = require('express-rate-limit');
 
 /**
  * @param {string} code The code to evaluate
@@ -28,6 +29,13 @@ connection.connect();
 
 // Middleware to parse JSON requests
 app.use(bodyParser.json());
+
+// Apply rate limiting to all requests
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max 100 requests per windowMs
+});
+app.use(limiter);
 
 // Endpoint to authenticate user
 app.post('/login', (req, res) => {
@@ -57,23 +65,4 @@ app.post('/login', (req, res) => {
 const port = 3000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
-});
-
-// Fixing the vulnerability
-// Use query parameters to prevent SQL injection
-const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
-const values = [username, password];
-
-// Execute the SQL query with query parameters
-connection.query(query, values, (err, results) => {
-  if (err) {
-    console.error('Error executing query:', err);
-    return res.status(500).send('Internal Server Error');
-  }
-
-  if (results.length > 0) {
-    res.send('Login successful');
-  } else {
-    res.status(401).send('Invalid username or password');
-  }
 });
