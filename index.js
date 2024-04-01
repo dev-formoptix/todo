@@ -60,6 +60,13 @@ app.post('/login', limiter, (req, res) => {
   });
 });
 
+// Update the code to include rate limiting for the /:path route handler
+app.get('/:path', limiter, (req, res) => {
+  let path = req.params.path;
+  if (isValidPath(path))
+    res.sendFile(path);
+});
+
 // Start the server
 const port = 3000;
 app.listen(port, () => {
