@@ -1,7 +1,6 @@
 const mysql = require('mysql');
 const express = require('express');
 const bodyParser = require('body-parser');
-const rateLimit = require('express-rate-limit');
 
 /**
  * @param {string} code The code to evaluate
@@ -19,8 +18,8 @@ const app = express();
 // Create connection to MySQL database
 const connection = mysql.createConnection({
   host: 'localhost',
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
+  user: 'root',
+  password: 'password',
   database: 'mydatabase'
 });
 
@@ -30,14 +29,8 @@ connection.connect();
 // Middleware to parse JSON requests
 app.use(bodyParser.json());
 
-// Apply rate limiting to specific routes
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // max 100 requests per windowMs
-});
-
 // Endpoint to authenticate user
-app.post('/login', limiter, (req, res) => {
+app.post('/login', (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
 
@@ -60,25 +53,8 @@ app.post('/login', limiter, (req, res) => {
   });
 });
 
-// Update the code to include rate limiting for the /:path route handler
-app.get('/:path', limiter, (req, res) => {
-  let path = req.params.path;
-  
-  // Check if the path is a valid path to prevent directory traversal attacks
-  if (isValidPath(path))
-    res.sendFile(path);
-  else
-    res.status(400).send('Invalid path');
-});
-
 // Start the server
 const port = 3000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
-
-// Helper function to validate path
-function isValidPath(path) {
-  // Implement your validation logic here
-  return true;
-}
