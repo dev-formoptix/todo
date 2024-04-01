@@ -2,22 +2,8 @@ const mysql = require('mysql');
 const express = require('express');
 const bodyParser = require('body-parser');
 const rateLimit = require('express-rate-limit');
-const sqlstring = require('sqlstring');
-
-/**
- * @param {string} code The code to evaluate
- * @returns {*} The result of the evaluation
- */
-function evaluateCode(code) {
-  return eval(code); // Alert: Avoid using eval() function
-}
-
-// Example usage triggering the alert
-evaluateCode("2 + 2");
 
 const app = express();
-
-// Create connection to MySQL database
 const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
@@ -25,29 +11,25 @@ const connection = mysql.createConnection({
   database: 'mydatabase'
 });
 
-// Connect to MySQL database
 connection.connect();
 
-// Middleware to parse JSON requests
 app.use(bodyParser.json());
 
-// Apply rate limiting middleware to all requests
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // max 100 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 100,
 });
 app.use(limiter);
 
-// Endpoint to authenticate user
 app.post('/login', (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
 
-  // Use query parameters or prepared statements to prevent SQL injection
   const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
+  
+  // Use query parameters or prepared statements to prevent SQL injection
   const values = [username, password];
 
-  // Execute the SQL query with query parameters
   connection.query(query, values, (err, results) => {
     if (err) {
       console.error('Error executing query:', err);
@@ -62,15 +44,14 @@ app.post('/login', (req, res) => {
   });
 });
 
-// Endpoint to search for products
 app.get('/search', (req, res) => {
   const category = req.query.category;
 
-  // Use query parameters or prepared statements to prevent SQL injection
   const query = 'SELECT item, price FROM products WHERE category = ? ORDER BY price';
+
+  // Use query parameters or prepared statements to prevent SQL injection
   const values = [category];
 
-  // Execute the SQL query with query parameters
   connection.query(query, values, (err, results) => {
     if (err) {
       console.error('Error executing query:', err);
@@ -81,7 +62,6 @@ app.get('/search', (req, res) => {
   });
 });
 
-// Start the server
 const port = 3000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
