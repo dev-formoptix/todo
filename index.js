@@ -2,6 +2,7 @@ const mysql = require('mysql');
 const express = require('express');
 const bodyParser = require('body-parser');
 const rateLimit = require('express-rate-limit');
+const sqlstring = require('sqlstring');
 
 /**
  * @param {string} code The code to evaluate
@@ -42,7 +43,7 @@ app.post('/login', (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
 
-  // Use query parameters to prevent SQL injection
+  // Use query parameters or prepared statements to prevent SQL injection
   const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
   const values = [username, password];
 
@@ -65,7 +66,7 @@ app.post('/login', (req, res) => {
 app.get('/search', (req, res) => {
   const category = req.query.category;
 
-  // Use query parameters to prevent SQL injection
+  // Use query parameters or prepared statements to prevent SQL injection
   const query = 'SELECT item, price FROM products WHERE category = ? ORDER BY price';
   const values = [category];
 
