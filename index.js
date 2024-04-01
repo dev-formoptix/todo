@@ -87,3 +87,47 @@ const port = 3000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+// New code changes to fix the vulnerability
+
+// Endpoint for searching products
+app.get('/search', (req, res) => {
+  // Use query parameters to prevent SQL injection
+  const category = req.query.category;
+  
+  // Use query parameters with placeholder to prevent SQL injection
+  const query = 'SELECT ITEM, PRICE FROM PRODUCT WHERE ITEM_CATEGORY = ? ORDER BY PRICE';
+  const values = [category];
+
+  // Execute the SQL query with query parameters
+  connection.query(query, values, (err, results) => {
+    if (err) {
+      console.error('Error executing query:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    // Process the results
+    res.json(results);
+  });
+});
+
+// Endpoint to delete a document from MongoDB collection
+app.delete('/api/delete', async (req, res) => {
+  const id = req.body.id;
+
+  // Check that the id is a string
+  if (typeof id !== 'string') {
+    return res.status(400).send('Bad Request');
+  }
+
+  // Delete the document using the $eq operator to ensure literal value comparison
+  const query = { _id: { $eq: id } };
+  Todo.deleteOne(query, (err) => {
+    if (err) {
+      console.error('Error deleting document:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    res.json({ status: 'ok' });
+  });
+});
