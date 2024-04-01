@@ -63,8 +63,12 @@ app.post('/login', limiter, (req, res) => {
 // Update the code to include rate limiting for the /:path route handler
 app.get('/:path', limiter, (req, res) => {
   let path = req.params.path;
+  
+  // Check if the path is a valid path to prevent directory traversal attacks
   if (isValidPath(path))
     res.sendFile(path);
+  else
+    res.status(400).send('Invalid path');
 });
 
 // Start the server
