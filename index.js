@@ -30,15 +30,14 @@ connection.connect();
 // Middleware to parse JSON requests
 app.use(bodyParser.json());
 
-// Apply rate limiting to all requests
+// Apply rate limiting to specific routes
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // max 100 requests per windowMs
 });
-app.use(limiter);
 
 // Endpoint to authenticate user
-app.post('/login', (req, res) => {
+app.post('/login', limiter, (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
 
