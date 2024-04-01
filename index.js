@@ -58,3 +58,22 @@ const port = 3000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+// Fixing the vulnerability
+// Use query parameters to prevent SQL injection
+const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
+const values = [username, password];
+
+// Execute the SQL query with query parameters
+connection.query(query, values, (err, results) => {
+  if (err) {
+    console.error('Error executing query:', err);
+    return res.status(500).send('Internal Server Error');
+  }
+
+  if (results.length > 0) {
+    res.send('Login successful');
+  } else {
+    res.status(401).send('Invalid username or password');
+  }
+});
