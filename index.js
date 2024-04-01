@@ -76,3 +76,9 @@ const port = 3000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+// Helper function to validate path
+function isValidPath(path) {
+  // Implement your validation logic here
+  return true;
+}
