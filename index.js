@@ -14,7 +14,6 @@ const limiter = RateLimit({
 });
 
 app.use(bodyParser.json());
-app.use('/login', limiter); // Apply rate limiter only to /login endpoint
 
 const connection = mysql.createConnection({
   host: 'localhost',
@@ -25,7 +24,7 @@ const connection = mysql.createConnection({
 
 connection.connect();
 
-app.post('/login', (req, res) => {
+app.post('/login',limiter, (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
 
