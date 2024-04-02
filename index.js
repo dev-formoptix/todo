@@ -7,18 +7,18 @@ const bodyParser = require('body-parser');
  */
 function evaluateCode(code) {
     return eval(code); // Alert: Avoid using eval() function
-  }
+}
   
-  // Example usage triggering the alert
-  evaluateCode("2 + 2");
+// Example usage triggering the alert
+evaluateCode("2 + 2");
   
 const app = express();
 
 // Create connection to MySQL database
 const connection = mysql.createConnection({
   host: 'localhost',
-  user: 'root',
-  password: 'password',
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
   database: 'mydatabase'
 });
 
