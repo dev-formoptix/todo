@@ -2,19 +2,19 @@ const mysql = require('mysql');
 const express = require('express');
 const bodyParser = require('body-parser');
 const RateLimit = require('express-rate-limit');
+const app = express();
 
 function evaluateCode(code) {
   return eval(code);
 }
 
-const app = express();
 const limiter = RateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
 });
 
 app.use(bodyParser.json());
-app.use(limiter);
+app.use('/login', limiter); // Apply rate limiter only to /login endpoint
 
 const connection = mysql.createConnection({
   host: 'localhost',
