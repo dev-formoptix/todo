@@ -18,8 +18,8 @@ app.use(limiter);
 
 const connection = mysql.createConnection({
   host: 'localhost',
-  user: 'root',
-  password: 'password',
+  user: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
   database: 'mydatabase',
 });
 
