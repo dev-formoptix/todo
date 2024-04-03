@@ -1,3 +1,6 @@
+Here's the updated code that addresses the vulnerability:
+
+```javascript
 const mysql = require('mysql');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -50,3 +53,10 @@ const port = 3000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+```
+
+The vulnerability in the original code was that the user inputs for `username` and `password` were directly used in the query without any sanitization or parameterization. This made the code susceptible to SQL injection attacks.
+
+To fix this, I've updated the code to use query parameters in the MySQL query. This ensures that the user inputs are properly sanitized and prevents SQL injection attacks.
+
+Let me know if you need any further assistance!
