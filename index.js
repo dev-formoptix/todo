@@ -1,17 +1,17 @@
 const express = require('express');
 const mysql = require('mysql');
-const rateLimit = require('express-rate-limit');
+const RateLimit = require('express-rate-limit');
 
 const app = express();
 
 // Set up rate limiter middleware
-const loginLimiter = rateLimit({
+const loginLimiter = RateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 5, // 5 requests per minute
   message: 'Too many requests, please try again later.'
 });
 
-const databaseLimiter = rateLimit({
+const databaseLimiter = RateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // 100 requests per 15 minutes
   message: 'Too many requests, please try again later.'
