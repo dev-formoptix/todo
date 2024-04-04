@@ -56,3 +56,9 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
+// 🚨 Vulnerability Details:
+// This route handler performs a database access, but is not rate-limited.
+
+// 🛠 Recommendation:
+// Apply rate limiting to the database access route handler to prevent denial-of-service attacks.
