@@ -43,6 +43,13 @@ app.post('/login', loginLimiter, (req, res) => {
   });
 });
 
+const rateLimiter = RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max 100 requests per windowMs
+});
+
+app.use(rateLimiter);
+
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
