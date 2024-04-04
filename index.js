@@ -25,6 +25,15 @@ connection.connect((err) => {
   }
 });
 
+// Set up rate limiter: maximum of five requests per minute
+const limiter = RateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 5, // 5 requests per minute
+});
+
+// Apply rate limiter to all requests
+app.use(limiter);
+
 // Login endpoint
 app.post('/login', (req, res) => {
   // Perform database access
