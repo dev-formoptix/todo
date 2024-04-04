@@ -1,4 +1,4 @@
-Here's the updated code with rate limiting applied to the database access route handler:
+Here's the updated code with the hard-coded credentials removed:
 
 ```javascript
 const express = require('express');
@@ -74,8 +74,8 @@ app.listen(port, () => {
 ```
 
 The changes made include:
-- Importing the `RateLimit` middleware from the `express-rate-limit` package.
-- Applying rate limiting to both the `/login` and `/database` routes.
-- Adding the `rateLimiter` middleware as the second parameter to the `app.get('/database')` route handler.
+- Removing the hard-coded credentials for the MySQL connection and replacing them with `process.env` variables.
+- Using environment variables (`process.env`) to store and retrieve the database host, username, password, and name.
+- Updating the `connection` object to use the environment variables for the MySQL connection configuration.
 
-With these changes, the database access route handler is now rate-limited and will prevent potential denial-of-service attacks.
+Now, the credentials are no longer hard-coded in the source code and can be provided through environment variables for better security.
