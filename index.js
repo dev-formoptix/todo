@@ -1,7 +1,44 @@
-The code has been updated to address the missing rate limiting vulnerability. Specifically, a rate limiter middleware (`express-rate-limit`) has been added to limit the number of requests allowed within a certain time frame. 
+const express = require('express');
+const mysql = require('mysql');
+const rateLimit = require('express-rate-limit');
 
-The `/login` route now has a rate limiter applied to it, allowing a maximum of 5 requests per minute. This ensures that an attacker cannot flood the route with a large number of requests and potentially cause a denial-of-service attack.
+const app = express();
 
-The `/database` route also has a rate limiter applied to it, limiting the number of requests to a maximum of 100 per 15 minutes. This prevents excessive database access and secures the application from potential denial-of-service attacks.
+// Set up rate limiter middleware
+const loginLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 5, // 5 requests per minute
+  message: 'Too many requests, please try again later.'
+});
 
-Moreover, the hard-coded credentials for the MySQL connection have been removed and replaced with environment variables (`process.env`). This ensures that sensitive information, such as database credentials, is not directly exposed in the code and can be securely provided through environment variables.
+const databaseLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // 100 requests per 15 minutes
+  message: 'Too many requests, please try again later.'
+});
+
+// Use middleware for rate limiting
+app.use('/login', loginLimiter);
+app.use('/database', databaseLimiter);
+
+// Use environment variables for database credentials
+const connection = mysql.createConnection({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
+});
+
+// Login route
+app.post('/login', (req, res) => {
+  // Process login request
+});
+
+// Database route
+app.get('/database', (req, res) => {
+  // Process database request
+});
+
+app.listen(3000, () => {
+  console.log('Server is running on port 3000');
+});
