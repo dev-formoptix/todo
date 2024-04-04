@@ -35,7 +35,7 @@ const limiter = RateLimit({
 app.use(limiter);
 
 // Login endpoint
-app.post('/login', (req, res) => {
+app.post('/login', limiter, (req, res) => {
   // Perform database access
   const { username, password } = req.body;
   const sql = 'SELECT * FROM users WHERE username = ? AND password = ?';
