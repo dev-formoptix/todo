@@ -4,7 +4,7 @@ const RateLimit = require('express-rate-limit');
 const mysql = require('mysql');
 const connection = mysql.createConnection({
   host: process.env.DB_HOST,
-  user: process.env.DB_USERNAME,
+  user: process.env.DB_USERNAME || 'root',
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
 });
