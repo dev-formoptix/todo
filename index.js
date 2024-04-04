@@ -1,5 +1,3 @@
-Here is the updated code that addresses the vulnerability:
-
 ```javascript
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -58,6 +56,15 @@ app.use('/database', rateLimiter);
 
 app.get('/database', (req, res) => {
   // Perform database access
+  const sql = 'SELECT * FROM my_table';
+  connection.query(sql, (err, result) => {
+    if (err) {
+      console.error('Error executing MySQL query:', err);
+      res.status(500).json({ message: 'Internal Server Error' });
+    } else {
+      res.json({ data: result });
+    }
+  });
 });
 
 const port = process.env.PORT || 3000;
@@ -65,9 +72,3 @@ app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 ```
-
-In this updated code:
-1. The `rateLimiter` middleware is added to limit the number of requests to the `/database` route handler. This helps prevent denial-of-service attacks.
-2. The `/database` route handler is modified to perform the necessary database access. You can update this handler based on your specific logic.
-
-Note that the specific details of the `/database` route handler are missing in the original code, so you need to update it according to your requirements. This code only demonstrates how to apply rate limiting to the database access route handler.
