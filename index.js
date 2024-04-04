@@ -3,13 +3,6 @@ const bodyParser = require('body-parser');
 const RateLimit = require('express-rate-limit');
 
 const app = express();
-const limiter = RateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // max 100 requests per windowMs
-});
-
-// Apply rate limiter to all requests
-app.use(limiter);
 
 // Parse incoming request bodies
 app.use(bodyParser.json());
@@ -38,25 +31,14 @@ app.post('/login', (req, res) => {
   const { username, password } = req.body;
   const sql = 'SELECT * FROM users WHERE username = ? AND password = ?';
 
-  // Add rate limiting to database queries
-  limiter.resetKey(req.ip + '/login'); // Reset rate limit for each request
-  limiter.execWithinWindow(req.ip + '/login', (err, execCount) => {
+  connection.query(sql, [username, password], (err, result) => {
     if (err) {
-      console.error('Error executing rate limit:', err);
+      console.error('Error executing MySQL query:', err);
       res.status(500).json({ message: 'Internal Server Error' });
-    } else if (execCount > limiter.max) {
-      res.status(429).json({ message: 'Too Many Requests' });
+    } else if (result.length === 0) {
+      res.status(401).json({ message: 'Invalid credentials' });
     } else {
-      connection.query(sql, [username, password], (err, result) => {
-        if (err) {
-          console.error('Error executing MySQL query:', err);
-          res.status(500).json({ message: 'Internal Server Error' });
-        } else if (result.length === 0) {
-          res.status(401).json({ message: 'Invalid credentials' });
-        } else {
-          res.json({ message: 'Login successful' });
-        }
-      });
+      res.json({ message: 'Login successful' });
     }
   });
 });
