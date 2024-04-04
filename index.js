@@ -28,6 +28,7 @@ const loginLimiter = RateLimit({
 
 app.post('/login', loginLimiter, (req, res) => {
   const { username, password } = req.body;
+  // Use query parameters to embed user input into the query string
   const sql = 'SELECT * FROM users WHERE username = ? AND password = ?';
   const values = [username, password];
 
