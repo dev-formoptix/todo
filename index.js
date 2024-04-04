@@ -43,6 +43,7 @@ app.post('/login', loginLimiter, (req, res) => {
   });
 });
 
+// Set up rate limiter: maximum of 100 requests per 15 minutes
 const rateLimiter = RateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // max 100 requests per windowMs
