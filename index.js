@@ -21,14 +21,12 @@ connection.connect((err) => {
   }
 });
 
-const limiter = RateLimit({
+const loginLimiter = RateLimit({
   windowMs: 60 * 1000,
   max: 5,
 });
 
-app.use(limiter);
-
-app.post('/login', limiter, (req, res) => {
+app.post('/login', loginLimiter, (req, res) => {
   const { username, password } = req.body;
   const sql = 'SELECT * FROM users WHERE username = ? AND password = ?';
   const values = [username, password];
