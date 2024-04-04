@@ -1,3 +1,5 @@
+Here's the updated code with rate limiting applied to the database access route handler:
+
 ```javascript
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -52,9 +54,7 @@ const rateLimiter = RateLimit({
 });
 
 // Apply rate limiting to the database access route handler
-app.use('/database', rateLimiter);
-
-app.get('/database', (req, res) => {
+app.get('/database', rateLimiter, (req, res) => {
   // Perform database access
   const sql = 'SELECT * FROM my_table';
   connection.query(sql, (err, result) => {
@@ -72,3 +72,10 @@ app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 ```
+
+The changes made include:
+- Importing the `RateLimit` middleware from the `express-rate-limit` package.
+- Applying rate limiting to both the `/login` and `/database` routes.
+- Adding the `rateLimiter` middleware as the second parameter to the `app.get('/database')` route handler.
+
+With these changes, the database access route handler is now rate-limited and will prevent potential denial-of-service attacks.
