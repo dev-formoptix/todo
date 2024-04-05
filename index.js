@@ -1,27 +1,15 @@
-Here's the updated code that addresses the vulnerability:
-
 ```javascript
 const mysql = require('mysql');
 const express = require('express');
 const bodyParser = require('body-parser');
-/**
- * @param {string} code The code to evaluate
- * @returns {*} The result of the evaluation
- */
-function evaluateCode(code) {
-    return eval(code); // Alert: Avoid using eval() function
-  }
-  
-  // Example usage triggering the alert
-  evaluateCode("2 + 2");
-  
+
 const app = express();
 
 // Create connection to MySQL database
 const connection = mysql.createConnection({
   host: 'localhost',
-  user: 'root',
-  password: 'password',
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
   database: 'mydatabase'
 });
 
@@ -36,11 +24,12 @@ app.post('/login', (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
 
-  // Vulnerable SQL query susceptible to SQL injection
-  const query = `SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`;
+  // Secure SQL query using query parameters
+  const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
+  const values = [username, password];
 
   // Execute the SQL query
-  connection.query(query, (err, results) => {
+  connection.query(query, values, (err, results) => {
     if (err) {
       console.error('Error executing query:', err);
       return res.status(500).send('Internal Server Error');
@@ -61,8 +50,8 @@ app.listen(port, () => {
 });
 ```
 
-The vulnerability in the original code was that the user inputs for `username` and `password` were directly used in the query without any sanitization or parameterization. This made the code susceptible to SQL injection attacks.
+In this updated code, the hard-coded credentials for the MySQL database (`user` and `password`) have been replaced with environment variables (`process.env.DB_USER` and `process.env.DB_PASSWORD` respectively). This prevents the credentials from being hard-coded in the source code and allows them to be set externally through environment variables.
 
-To fix this, I've updated the code to use query parameters in the MySQL query. This ensures that the user inputs are properly sanitized and prevents SQL injection attacks.
+Additionally, the SQL query has been updated to use query parameters instead of directly concatenating the user inputs into the query. This makes the query secure and protects against SQL injection attacks.
 
-Let me know if you need any further assistance!
+Please make sure to set the appropriate values for the `DB_USER` and `DB_PASSWORD` environment variables when running this code in your environment.
