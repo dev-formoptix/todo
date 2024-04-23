@@ -1,157 +1,129 @@
-We want to add in the insights page a cumulative flow diagram using ant design charts. This should only show when filtering by a project, and should allow for filtering by date ranges. It should be similar to Jira's : https://support.atlassian.com/jira-software-cloud/docs/view-and-understand-the-velocity-chart/
+Currently, our webpack bundle size for minified js is over 13mb. I explored a little bit on reduction and have implemented some enhancements but it is still very large. One thing that might work is babel-plugin-import and use it for the antd /antd-icons imports (screenshot attached). There are probably some other options. 
 
-Example:
-
-A velocity chart is a useful agile tool, often used in Scrum, to track the amount of work a team completes during a sprint. It helps in predicting the team's future sprint capacity. The chart typically shows the total story points (or any other estimation unit) completed in each sprint, allowing teams to visualize their velocity over time.
+I also a screenshot of the results of the bundle analyzer. I fed this into chatGPT and this is the recommendations it had:
 
 
 
-To create a velocity report using Ant Design Charts, follow these general steps:
+The bundle analyzer screenshot you provided shows several large dependencies and gives a visual overview of what's contributing most to your bundle size. To reduce your minified JS file size, here are some modifications you could consider for your Webpack config:
 
 
 
-### Step 1: Data Preparation
+1. **Use Dynamic Imports for Large Dependencies**: 
 
-For the velocity chart, you will need historical sprint data that includes:
-
-- Sprint names or numbers (e.g., Sprint 1, Sprint 2, etc.)
-
-- The total estimation points (story points, hours, etc.) completed in each sprint
+   You could use code-splitting to only load certain parts of a library or component when needed. For instance, if you're using lodash, you can import only the functions you need instead of the whole library.
 
 
 
-Assuming you have multiple sprints data, your dataset might look something like this:
+2. **Tree Shaking**:
 
-```json
-
-[
-
-  { "sprint": "Sprint 1", "completedPoints": 20 },
-
-  { "sprint": "Sprint 2", "completedPoints": 25 },
-
-  // Add an entry for each sprint
-
-]
-
-```
+   Make sure Webpack's tree shaking is enabled by using ES6 module syntax (import/export) and ensure your Babel configuration is not compiling them down to CommonJS modules.
 
 
 
-### Step 2: Creating the Chart with Ant Design Charts
+3. **Minify and Uglify**:
 
-To visualize this data, a simple bar chart can effectively represent the velocity report. Here's an example of how you could implement it:
+   Utilize plugins like `TerserPlugin` to minify your JavaScript files if not already doing so. 
+
+
+
+4. **Externals**:
+
+   If you have large libraries that don’t change often (like React, Lodash, or Moment.js), consider loading them via a CDN and configuring them as `externals` in Webpack.
+
+
+
+5. **Analyzing and Removing Unused Code**: 
+
+   Use tools like `unused-webpack-plugin` or `webpack-bundle-analyzer` to find out chunks of code that are not being used and can be removed.
+
+
+
+6. **Optimize CSS**: 
+
+   If you have large CSS or styles brought in by JavaScript, consider optimizing them with plugins like `MiniCssExtractPlugin`, `OptimizeCSSAssetsPlugin`, or `css-minimizer-webpack-plugin`.
+
+
+
+7. **Optimizing Images and Fonts**: 
+
+   It looks like your images and fonts might also be taking up space. You can use loaders such as `image-webpack-loader` and `url-loader` to minimize and inline small images/fonts.
+
+
+
+8. **React-specific Optimizations**:
+
+   For React applications, make sure you're using `React.lazy` for dynamic imports and `Suspense` for lazy loading components.
+
+
+
+9. **Vendor Splitting**:
+
+   Separate your vendor scripts into different chunks using the `SplitChunksPlugin` in Webpack to better cache your code.
+
+
+
+10. **Analyze Library Usage**:
+
+    For libraries like `react-icons`, which seems quite large, consider importing only the icons you use instead of the entire library.
+
+
+
+Here is a small example of how you might dynamically import an icon from `react-icons`:
 
 
 
 ```javascript
 
-import React from 'react';
-
-import { Column } from '@ant-design/plots';
+import { useEffect, useState } from 'react';
 
 
 
-const VelocityChart = () => {
+const DynamicIcon = ({ iconName }) => {
 
-  const data = [
-
-    { sprint: "Sprint 1", completedPoints: 20 },
-
-    { sprint: "Sprint 2", completedPoints: 25 },
-
-    // Add data for all sprints
-
-  ];
+  const [IconComponent, setIconComponent] = useState(null);
 
 
 
-  const config = {
+  useEffect(() => {
 
-    data,
+    const importIcon = async () => {
 
-    xField: 'sprint',
+      try {
 
-    yField: 'completedPoints',
+        const { [iconName]: Icon } = await import('react-icons/fa');
 
-    label: {
+        setIconComponent(<Icon />);
 
-      // Display the data value on top of each bar
+      } catch (error) {
 
-      position: 'middle',
+        console.log(error);
 
-      style: {
+      }
 
-        fill: '#FFFFFF',
-
-        opacity: 0.6,
-
-      },
-
-    },
-
-    xAxis: {
-
-      label: {
-
-        autoHide: true,
-
-        autoRotate: false,
-
-      },
-
-    },
-
-    yAxis: {
-
-      title: {
-
-        text: 'Completed Points',
-
-      },
-
-    },
-
-    meta: {
-
-      sprint: {
-
-        alias: 'Sprint',
-
-      },
-
-      completedPoints: {
-
-        alias: 'Completed Points',
-
-      },
-
-    },
-
-  };
+    };
 
 
 
-  return <Column {...config} />;
+    importIcon();
+
+  }, [iconName]);
+
+
+
+  return IconComponent;
 
 };
-
-
-
-export default VelocityChart;
 
 ```
 
 
 
-### Step 3: Enhancements and Considerations
-
-- **Dynamic Data:** If your project management tool provides an API, consider fetching sprint data dynamically to keep your velocity chart updated.
-
-- **Comparing Estimates vs. Actuals:** For a more detailed analysis, you could add another bar for each sprint representing the estimated points planned at the beginning of the sprint versus the actual points completed. This requires adjusting your dataset and config to accommodate the additional data series.
-
-- **Customization:** Ant Design Charts offers extensive customization options. Explore the documentation for features like tooltips, custom color schemes, interactive filters, and more to enhance your velocity chart.
+Then you can use this `DynamicIcon` component and pass the icon name as a prop.
 
 
 
-By following these steps and adapting the example code to your specific needs, you can effectively visualize your team's velocity using Ant Design Charts, providing valuable insights for sprint planning and capacity forecasting.
+Finally, ensure that all your production plugins are only used in production and not included during development builds. This will speed up your development build times and ensure that plugins like `TerserPlugin` do not consume resources when not needed. 
+
+
+
+Combining these strategies should help reduce the overall size of your bundle.
