@@ -1,129 +1,159 @@
-Currently, our webpack bundle size for minified js is over 13mb. I explored a little bit on reduction and have implemented some enhancements but it is still very large. One thing that might work is babel-plugin-import and use it for the antd /antd-icons imports (screenshot attached). There are probably some other options. 
+We want to add the ability to Annotate over attached images, using react-sketch. A user should be able to then save the annotated image, here is an example from ChatGPT:
 
-I also a screenshot of the results of the bundle analyzer. I fed this into chatGPT and this is the recommendations it had:
 
 
+To improve the user experience by allowing more dynamic color selections for annotations, you can add a color picker alongside the tool selection. This will enable users to choose different colors for their annotations directly from the modal. Here’s an updated version of the `ImageEditorModal` component incorporating a color picker:
 
-The bundle analyzer screenshot you provided shows several large dependencies and gives a visual overview of what's contributing most to your bundle size. To reduce your minified JS file size, here are some modifications you could consider for your Webpack config:
 
 
+```jsx
 
-1. **Use Dynamic Imports for Large Dependencies**: 
+import React, { useState } from 'react';
 
-   You could use code-splitting to only load certain parts of a library or component when needed. For instance, if you're using lodash, you can import only the functions you need instead of the whole library.
+import { Modal } from 'antd'; // Assuming you are using antd for the modal
 
+import { SketchField, Tools } from 'react-sketch';
 
 
-2. **Tree Shaking**:
 
-   Make sure Webpack's tree shaking is enabled by using ES6 module syntax (import/export) and ensure your Babel configuration is not compiling them down to CommonJS modules.
+const ImageEditorModal = ({ previewVisible, setPreviewVisible, previewSrc }) => {
 
+  const [tool, setTool] = useState(Tools.Pencil); // Default tool
 
+  const [lineColor, setLineColor] = useState('#000000'); // Default color for annotations
 
-3. **Minify and Uglify**:
+  const [lineWidth, setLineWidth] = useState(3); // Default line width
 
-   Utilize plugins like `TerserPlugin` to minify your JavaScript files if not already doing so. 
 
 
+  const handleToolChange = (e) => {
 
-4. **Externals**:
+    setTool(e.target.value);
 
-   If you have large libraries that don’t change often (like React, Lodash, or Moment.js), consider loading them via a CDN and configuring them as `externals` in Webpack.
+  };
 
 
 
-5. **Analyzing and Removing Unused Code**: 
+  return (
 
-   Use tools like `unused-webpack-plugin` or `webpack-bundle-analyzer` to find out chunks of code that are not being used and can be removed.
+    <Modal
 
+      open={previewVisible}
 
+      width="70%"
 
-6. **Optimize CSS**: 
+      footer={null}
 
-   If you have large CSS or styles brought in by JavaScript, consider optimizing them with plugins like `MiniCssExtractPlugin`, `OptimizeCSSAssetsPlugin`, or `css-minimizer-webpack-plugin`.
+      onCancel={() => setPreviewVisible(false)}
 
+    >
 
+      <React.Fragment>
 
-7. **Optimizing Images and Fonts**: 
+        {previewSrc && (
 
-   It looks like your images and fonts might also be taking up space. You can use loaders such as `image-webpack-loader` and `url-loader` to minimize and inline small images/fonts.
+          <div>
 
+            <SketchField
 
+              width="100%"
 
-8. **React-specific Optimizations**:
+              height="512px"
 
-   For React applications, make sure you're using `React.lazy` for dynamic imports and `Suspense` for lazy loading components.
+              tool={tool}
 
+              lineColor={lineColor}
 
+              lineWidth={lineWidth}
 
-9. **Vendor Splitting**:
+              imageSrc={previewSrc}
 
-   Separate your vendor scripts into different chunks using the `SplitChunksPlugin` in Webpack to better cache your code.
+            />
 
+            <div style={{ marginTop: '10px' }}>
 
+              <label>Tool: </label>
 
-10. **Analyze Library Usage**:
+              <select onChange={handleToolChange} value={tool}>
 
-    For libraries like `react-icons`, which seems quite large, consider importing only the icons you use instead of the entire library.
+                <option value={Tools.Pencil}>Pencil</option>
 
+                <option value={Tools.Rectangle}>Rectangle</option>
 
+                <option value={Tools.Circle}>Circle</option>
 
-Here is a small example of how you might dynamically import an icon from `react-icons`:
+                <option value={Tools.Line}>Line</option>
 
+                <option value={Tools.Select}>Select</option>
 
+                <option value={Tools.Text}>Text</option>
 
-```javascript
+              </select>
 
-import { useEffect, useState } from 'react';
+              <label style={{ marginLeft: '20px' }}>Color: </label>
 
+              <input
 
+                type="color"
 
-const DynamicIcon = ({ iconName }) => {
+                value={lineColor}
 
-  const [IconComponent, setIconComponent] = useState(null);
+                onChange={(e) => setLineColor(e.target.value)}
 
+              />
 
+              <label style={{ marginLeft: '20px' }}>Line Width: </label>
 
-  useEffect(() => {
+              <input
 
-    const importIcon = async () => {
+                type="range"
 
-      try {
+                min="1"
 
-        const { [iconName]: Icon } = await import('react-icons/fa');
+                max="10"
 
-        setIconComponent(<Icon />);
+                value={lineWidth}
 
-      } catch (error) {
+                onChange={(e) => setLineWidth(e.target.value)}
 
-        console.log(error);
+              />
 
-      }
+            </div>
 
-    };
+          </div>
 
+        )}
 
+      </React.Fragment>
 
-    importIcon();
+    </Modal>
 
-  }, [iconName]);
-
-
-
-  return IconComponent;
+  );
 
 };
+
+
+
+export default ImageEditorModal;
 
 ```
 
 
 
-Then you can use this `DynamicIcon` component and pass the icon name as a prop.
+### Key Updates:
+
+- **Color Picker**: Added directly next to the tool selection for easy access. This allows users to change the color of their drawing or annotation tool on the fly.
+
+- **Tool and Style Labels**: Added labels for better UI clarity, making it easier for users to understand the options available for modification (tools, color, and line width).
 
 
 
-Finally, ensure that all your production plugins are only used in production and not included during development builds. This will speed up your development build times and ensure that plugins like `TerserPlugin` do not consume resources when not needed. 
+### Additional Considerations:
+
+- **UI Design**: You might want to further style the color picker and the tool selectors to match your application’s look and feel. This can involve CSS styling or using custom components that better fit your design system.
+
+- **Advanced Features**: Depending on your requirements, consider adding more advanced features like opacity control, more drawing tools, or presets for commonly used annotation colors.
 
 
 
-Combining these strategies should help reduce the overall size of your bundle.
+This updated component now provides an integrated experience for users to not only select the type of annotation they want to apply but also customize it with different colors and line widths, enhancing the flexibility and usability of your image annotation feature in ProdigyBuild.
