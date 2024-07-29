@@ -9,7 +9,7 @@ app.get('/eval', (req, res) => {
     const userInput = req.query.input;
     const code = new Function(userInput); // Safely execute code
     code(); // Execute the provided code
-    res.send('Eval executed!');
+    res.send('Eval executed!'); 
 });
 
 // Properly sanitized endpoint using context-specific escaping
