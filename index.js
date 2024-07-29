@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
 const RateLimit = require('express-rate-limit');
+const shellQuote = require('shell-quote');
 
 const app = express();
 const port = 3000;
@@ -39,6 +40,21 @@ app.get('/exec', (req, res) => {
     // Validate user input and do not execute the command directly
     // You can use libraries like 'shelljs' or 'execa' for safe command execution
     exec(cmd, (err, stdout, stderr) => {
+        if (err) {
+            res.send(`Error: ${stderr}`);
+            return;
+        }
+        res.send(`Output: ${stdout}`);
+    });
+});
+
+// Change Command Injection Vulnerable Endpoint
+app.get('/exec-fixed', (req, res) => {
+    const cmd = req.query.cmd;
+    const cmdArgs = shellQuote.parse(cmd); // Use shell-quote to parse user input into an array of arguments
+    // Validate user input and do not execute the command directly
+    // You can use libraries like 'shelljs' or 'execa' for safe command execution
+    exec(cmdArgs[0], cmdArgs.slice(1), (err, stdout, stderr) => { // Use command arguments as an array of strings
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
