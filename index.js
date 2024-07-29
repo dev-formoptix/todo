@@ -10,7 +10,7 @@ const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: 'password',
-    database: 'test' 
+    database: 'testd' 
 });
 
 connection.connect();
@@ -23,7 +23,7 @@ app.get('/user', (req, res) => {
         if (err) throw err;
         res.send(results);
     });
-});
+}); 
 
 // Command Injection Vulnerable Endpoint
 // app.get('/exec', (req, res) => {
@@ -36,7 +36,7 @@ app.get('/user', (req, res) => {
 //         res.send(`Output: ${stdout}`);
 //     });
 // });
-
+ 
 // Insecure Random Number Generation
 app.get('/random', (req, res) => {
     const randomNumber = Math.random(); // Insecure random number generation
