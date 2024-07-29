@@ -47,6 +47,12 @@ body
 
 app.get('/process', (req, res) => {
     let command = req.query.command;
+    // Use rate limit to prevent denial-of-service attacks
+    const limiter = RateLimit({
+        windowMs: 15 * 60 * 1000, // 15 minutes
+        max: 100, // max 100 requests per windowMs
+    });
+    app.use(limiter);
     cp.execFileSync('sh', ['-c', command]); // Use shell command with arguments as array
     res.send('Command executed!');
 });
