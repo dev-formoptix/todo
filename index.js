@@ -1,8 +1,15 @@
 const express = require('express');
 const _ = require('lodash');
+const RateLimit = require('express-rate-limit');
 
 const app = express();
 const port = 3000;
+
+const limiter = RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max 100 requests per windowMs
+});
+app.use(limiter);
 
 // Safe version of eval using Function constructor
 app.get('/eval', (req, res) => {
