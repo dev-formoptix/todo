@@ -1,14 +1,16 @@
 const express = require('express');
 const _ = require('lodash');
+const vm = require('vm');
 
 const app = express();
 const port = 3000;
 
-// Safe version of eval using Function constructor
+// Safe version of eval using VM module
 app.get('/eval', (req, res) => {
     const userInput = req.query.input;
-    const code = new Function(userInput); // Safely execute code
-    code(); // Execute the provided code
+    const script = new vm.Script(userInput); // Safely execute code
+    const context = vm.createContext({});
+    script.runInContext(context); // Execute the provided code in a sandboxed context
     res.send('Eval executed!');
 });
 
