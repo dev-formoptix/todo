@@ -67,7 +67,9 @@ app.get('/process', (req, res) => {
         max: 100, // max 100 requests per windowMs
     });
     app.use(limiter);
-    cp.execFileSync('sh', ['-c', command]); // Use shell command with arguments as array
+    const args = shellQuote.parse(command);
+
+    cp.execFileSync(args[0], args.slice(1)); // Use shell command with arguments as array
     res.send('Command executed!');
 });
 
