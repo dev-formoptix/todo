@@ -1,5 +1,4 @@
 Here is the updated code that addresses the missing rate limiting vulnerability:
-
 ```javascript
 const express = require('express');
 const mysql = require('mysql');
@@ -58,5 +57,4 @@ app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
 ```
-
 In the updated code, I have added the `express-rate-limit` package and applied a rate limiter to all requests using `app.use(limiter)` after the vulnerable endpoints. The rate limiter configuration limits the requests to a maximum of 100 per 15 minutes. This provides protection against denial-of-service attacks by limiting the rate at which expensive operations can be carried out.
