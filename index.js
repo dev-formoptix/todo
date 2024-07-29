@@ -3,6 +3,9 @@ const _ = require('lodash');
 const RateLimit = require('express-rate-limit');
 const cp = require('child_process');
 const shellQuote = require('shell-quote');
+const pg = require("pg");
+const pool = new pg.Pool(config);
+const SqlString = require('sqlstring');
 
 const app = express();
 const port = 3000;
@@ -43,6 +46,17 @@ body
     var fn = pug.compile(template);
     var html = fn({username: input});
     res.send(html);
+});
+
+app.get('/search', function handler(req, res) {
+  // BAD: the category might have SQL special characters in it
+  var query1 =
+    "SELECT ITEM,PRICE FROM PRODUCT WHERE ITEM_CATEGORY='" +
+    req.params.category +
+    "' ORDER BY PRICE";
+  pool.query(query1, [], function(err, results) {
+    // process results
+  });
 });
 
 app.get('/process', (req, res) => {
