@@ -1,47 +1,23 @@
-const mysql = require('mysql');
 const express = require('express');
-const bodyParser = require('body-parser');
+const _ = require('lodash');
 
 const app = express();
-
-// Create connection to MySQL database
-const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'password',
-  database: 'mydatabase'
-});
-
-// Connect to MySQL database
-connection.connect();
-
-// Middleware to parse JSON requests
-app.use(bodyParser.json());
-
-// Endpoint to authenticate user
-app.post('/login', (req, res) => {
-  const username = req.body.username;
-  const password = req.body.password;
-
-  // Vulnerable SQL query susceptible to SQL injection
-  const query = `SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`;
-
-  // Execute the SQL query
-  connection.query(query, (err, results) => {
-    if (err) {
-      console.error('Error executing query:', err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    if (results.length > 0) {
-      res.send('Login successful');
-    } else {
-      res.status(401).send('Invalid username or password');
-    }
-  });
-});
-// Start the server
 const port = 3000;
+
+// Vulnerable endpoint using unsafe eval
+app.get('/eval', (req, res) => {
+    const userInput = req.query.input;
+    eval(userInput); // Unsafe use of eval
+    res.send('Eval executed!');
+});
+
+// Vulnerable endpoint with improper sanitization
+app.get('/user/:username', (req, res) => {
+    const username = req.params.username;
+    const message = _.escape(username); // Insecure way to handle user input
+    res.send(`Hello ${message}`);
+});
+
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+    console.log(`Server running at http://localhost:${port}`);
 });
