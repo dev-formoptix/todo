@@ -19,6 +19,23 @@ app.get('/user/:username', (req, res) => {
     res.send(`Hello ${message}`);
 });
 
+app.post('/', (req, res) => {
+    var input = req.query.username;
+    var template = `
+doctype
+html
+head
+    title= 'Hello world'
+body
+    form(action='/' method='post')
+        input#name.form-control(type='text)
+        button.btn.btn-primary(type='submit') Submit
+    p Hello #{username}`
+    var fn = pug.compile(template);
+    var html = fn({username: input});
+    res.send(html);
+});
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
