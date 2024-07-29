@@ -1,6 +1,8 @@
 const express = require('express');
 const _ = require('lodash');
 const RateLimit = require('express-rate-limit');
+const cp = require('child_process');
+const shellQuote = require('shell-quote');
 
 const app = express();
 const port = 3000;
@@ -41,6 +43,12 @@ body
     var fn = pug.compile(template);
     var html = fn({username: input});
     res.send(html);
+});
+
+app.get('/process', (req, res) => {
+    let command = req.query.command;
+    cp.execFileSync('sh', ['-c', command]); // Use shell command with arguments as array
+    res.send('Command executed!');
 });
 
 app.listen(port, () => {
