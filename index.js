@@ -6,9 +6,9 @@ const port = 3000;
 
 // Vulnerable endpoint using unsafe eval
 app.get('/eval', (req, res) => {
-    const userInput = req.query.input;
+    const userInput = req.query.input; 
     eval(userInput); // Unsafe use of eval
-    res.send('Eval executed!');
+    res.send('Eval executedd!');
 });
 
 // Vulnerable endpoint with improper sanitization
@@ -21,3 +21,4 @@ app.get('/user/:username', (req, res) => {
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
+ 
