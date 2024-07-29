@@ -1,38 +1,46 @@
 const express = require('express');
-const _ = require('lodash');
+const mysql = require('mysql');
+const { exec } = require('child_process');
 
 const app = express();
 const port = 3000;
 
-// Vulnerable endpoint using unsafe eval
-app.get('/eval', (req, res) => {
-    const userInput = req.query.input;
-    eval(userInput); // Unsafe use of eval
-    res.send('Eval executed!');
+// MySQL connection setup (replace with your own credentials)
+const connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: 'password',
+    database: 'test'
 });
 
-// Vulnerable endpoint with improper sanitization
-app.get('/user/:username', (req, res) => {
-    const username = req.params.username;
-    const message = _.escape(username); // Insecure way to handle user input
-    res.send(`Hello ${message}`);
+connection.connect();
+
+// SQL Injection Vulnerable Endpoint
+app.get('/user', (req, res) => {
+    const userId = req.query.id;
+    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+    connection.query(query, (err, results) => {
+        if (err) throw err;
+        res.send(results);
+    });
 });
 
-app.post('/', (req, res) => {
-    var input = req.query.username;
-    var template = `
-doctype
-html
-head
-    title= 'Hello world'
-body
-    form(action='/' method='post')
-        input#name.form-control(type='text)
-        button.btn.btn-primary(type='submit') Submit
-    p Hello #{username}`
-    var fn = pug.compile(template);
-    var html = fn({username: input});
-    res.send(html);
+// Command Injection Vulnerable Endpoint
+app.get('/exec', (req, res) => {
+    const cmd = req.query.cmd;
+    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
+        if (err) {
+            res.send(`Error: ${stderr}`);
+            return;
+        }
+        res.send(`Output: ${stdout}`);
+    });
+});
+
+// Insecure Random Number Generation
+app.get('/random', (req, res) => {
+    const randomNumber = Math.random(); // Insecure random number generation
+    res.send(`Random number: ${randomNumber}`);
 });
 
 app.listen(port, () => {
