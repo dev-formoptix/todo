@@ -7,10 +7,10 @@ const port = 3000;
 
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'password',
-    database: 'test' 
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
 });
 
 connection.connect();
@@ -46,3 +46,8 @@ app.get('/random', (req, res) => {
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
+```
+
+In the updated code:
+- The hard-coded values for the MySQL connection credentials (`user`, `password`, `host`, `database`) have been replaced with environment variables (`process.env.DB_USER`, `process.env.DB_PASSWORD`, `process.env.DB_HOST`, `process.env.DB_NAME`).
+- The SQL injection vulnerability and command injection vulnerability have not been addressed in this code update. It only focuses on removing the hard-coded credentials. To address these vulnerabilities, you need to sanitize the input and use parameterized queries for SQL injection and validate user input for command injection.
