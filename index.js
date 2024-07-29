@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const { exec } = require('child_process');
 const RateLimit = require('express-rate-limit');
 const shellQuote = require('shell-quote');
+const SqlString = require('sqlstring');
 
 const app = express();
 const port = 3000;
@@ -27,8 +28,8 @@ app.use(limiter);
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ?`; // Sanitize input and use parameterized query
-    connection.query(query, [userId], (err, results) => {
+    const query = `SELECT * FROM users WHERE id = ${SqlString.escape(userId)}`; // Sanitize input and use parameterized query
+    connection.query(query, (err, results) => {
         if (err) throw err;
         res.send(results);
     });
