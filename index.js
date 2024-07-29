@@ -40,7 +40,6 @@ app.post('/login', (req, res) => {
     }
   });
 });
-
 // Start the server
 const port = 3000;
 app.listen(port, () => {
