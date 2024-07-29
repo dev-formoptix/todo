@@ -1,5 +1,3 @@
-To fix the missing rate limiting vulnerability in the code, we can use the `express-rate-limit` package. 
-
 Here's the updated code for `index.js`:
 
 ```javascript
