@@ -8,8 +8,8 @@ const app = express();
 const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: 'password',  
-  database: 'mydatabase' 
+  password: 'password',
+  database: 'mydatabase'
 });
 
 // Connect to MySQL database
@@ -23,11 +23,11 @@ app.post('/login', (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
 
-  // Use parameterized query to prevent SQL injection
-  const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
+  // Vulnerable SQL query susceptible to SQL injection
+  const query = `SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`;
 
-  // Execute the SQL query with parameters
-  connection.query(query, [username, password], (err, results) => {
+  // Execute the SQL query
+  connection.query(query, (err, results) => {
     if (err) {
       console.error('Error executing query:', err);
       return res.status(500).send('Internal Server Error');
