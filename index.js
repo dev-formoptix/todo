@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql');
 const { execFileSync } = require('child_process');
 const RateLimit = require('express-rate-limit');
+const SqlString = require('sqlstring');
 
 const app = express();
 const port = 3000;
@@ -28,7 +29,7 @@ app.use(['/user', '/exec'], limiter);
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${connection.escape(userId)}`;
+    const query = `SELECT * FROM users WHERE id = ${SqlString.escape(userId)}`;
     connection.query(query, (err, results) => {
         if (err) throw err;
         res.send(results);
@@ -39,7 +40,7 @@ app.get('/user', (req, res) => {
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
     const cmdArgs = cmd.split(' ');
-    execFileSync(cmdArgs[0], cmdArgs.slice(1), {stdio: 'pipe', encoding: 'utf-8'}).then((stdout) => {
+        execFileSync(cmdArgs[0], cmdArgs.slice(1), {stdio: 'pipe', encoding: 'utf-8'}).then((stdout) => {
         res.send(`Output: ${stdout}`);
     }).catch((error) => {
         res.send(`Error: ${error.stderr}`);
