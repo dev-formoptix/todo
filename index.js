@@ -1,7 +1,7 @@
 const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
-const shellQuote = require('shell-quote'); // Import shell-quote library
+const shellQuote = require('shell-quote'); 
 
 const app = express();
 const port = 3000;
@@ -19,7 +19,7 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${connection.escape(userId)}`; // Use connection.escape to mitigate SQL injection
+    const query = `SELECT * FROM users WHERE id = ${connection.escape(userId)}`; 
     connection.query(query, (err, results) => {
         if (err) throw err;
         res.send(results);
@@ -29,8 +29,8 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    const cmdArgs = shellQuote.parse(cmd); // Use shell-quote library to parse command arguments
-    exec(cmdArgs[0], cmdArgs.slice(1), (err, stdout, stderr) => { // Pass command arguments as an array instead of a single string
+    const cmdArgs = shellQuote.parse(cmd); 
+    exec(cmdArgs[0], cmdArgs.slice(1), (err, stdout, stderr) => { 
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
@@ -41,7 +41,7 @@ app.get('/exec', (req, res) => {
 
 // Insecure Random Number Generation
 app.get('/random', (req, res) => {
-    const randomNumber = Math.random(); // Insecure random number generation
+    const randomNumber = Math.random(); 
     res.send(`Random number: ${randomNumber}`);
 });
 
