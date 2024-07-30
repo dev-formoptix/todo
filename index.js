@@ -51,6 +51,15 @@ const limiter = RateLimit({
 });
 app.use(limiter);
 
+// Updated code
+app.get('/database', (req, res) => {
+  const query = 'SELECT * FROM users';
+  connection.query(query, (err, results) => {
+    if (err) throw err;
+    res.send(results);
+  });
+});
+
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
