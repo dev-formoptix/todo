@@ -1,6 +1,7 @@
 const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
+const shellQuote = require('shell-quote'); // Import shell-quote library
 
 const app = express();
 const port = 3000;
@@ -18,7 +19,7 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+    const query = `SELECT * FROM users WHERE id = ${connection.escape(userId)}`; // Use connection.escape to mitigate SQL injection
     connection.query(query, (err, results) => {
         if (err) throw err;
         res.send(results);
@@ -28,7 +29,8 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
+    const cmdArgs = shellQuote.parse(cmd); // Use shell-quote library to parse command arguments
+    exec(cmdArgs[0], cmdArgs.slice(1), (err, stdout, stderr) => { // Pass command arguments as an array instead of a single string
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
