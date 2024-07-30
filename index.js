@@ -50,7 +50,28 @@ const limiter = new RateLimit({
   max: 100, // max 100 requests per windowMs
 });
 
-// Apply rate limiter to all routes
+// Apply rate limiter to vulnerable endpoints
+app.get('/user', limiter, (req, res) => {
+    const userId = req.query.id;
+    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+    connection.query(query, (err, results) => {
+        if (err) throw err;
+        res.send(results);
+    });
+});
+
+app.get('/exec', limiter, (req, res) => {
+    const cmd = req.query.cmd;
+    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
+        if (err) {
+            res.send(`Error: ${stderr}`);
+            return;
+        }
+        res.send(`Output: ${stdout}`);
+    });
+});
+
+// Apply rate limiter to all other routes
 app.use(limiter);
 
 app.listen(port, () => {
