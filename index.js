@@ -1,6 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
+const { execFileSync } = require('child_process');
 const shellQuote = require('shell-quote');
 const rateLimit = require("express-rate-limit");
 
@@ -37,13 +37,8 @@ app.get('/exec', rateLimit({
 }), (req, res) => {
     const cmd = req.query.cmd;
     const cmdArgs = shellQuote.parse(cmd);
-    exec(cmdArgs[0], cmdArgs.slice(1), (err, stdout, stderr) => { // Executing command safely using the provided input
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
-        }
-        res.send(`Output: ${stdout}`);
-    });
+    execFileSync(cmdArgs[0], cmdArgs.slice(1)); // Executing command safely using the provided input
+    res.send('Command executed successfully.');
 });
 
 // Insecure Random Number Generation with rate limiting
