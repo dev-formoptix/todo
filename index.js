@@ -23,8 +23,8 @@ app.get('/user', rateLimit({
     max: 100, // max 100 requests per windowMs
 }), (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${mysql.escape(userId)}`; // Escaping user input to prevent SQL injection
-    connection.query(query, (err, results) => {
+    const query = `SELECT * FROM users WHERE id = ?`; // Change query to use query parameters
+    connection.query(query, [userId], (err, results) => { // Pass user input as an array of query parameters
         if (err) throw err;
         res.send(results);
     });
