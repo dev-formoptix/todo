@@ -1,7 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
-const shellQuote = require('shell-quote');
+const { execFileSync } = require('child_process');
 const RateLimit = require('express-rate-limit');
 
 const app = express();
@@ -39,13 +38,11 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    const cmdArgs = shellQuote.parse(cmd);
-    exec(cmdArgs[0], cmdArgs.slice(1), (err, stdout, stderr) => {
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
-        }
+    const cmdArgs = cmd.split(' ');
+    execFileSync(cmdArgs[0], cmdArgs.slice(1), {stdio: 'pipe', encoding: 'utf-8'}).then((stdout) => {
         res.send(`Output: ${stdout}`);
+    }).catch((error) => {
+        res.send(`Error: ${error.stderr}`);
     });
 });
 
