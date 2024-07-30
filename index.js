@@ -17,8 +17,11 @@ const connection = mysql.createConnection({
 
 connection.connect();
 
-// SQL Injection Vulnerable Endpoint
-app.get('/user', (req, res) => {
+// SQL Injection Vulnerable Endpoint with rate limiting
+app.get('/user', rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // max 100 requests per windowMs
+}), (req, res) => {
     const userId = req.query.id;
     const query = `SELECT * FROM users WHERE id = ${mysql.escape(userId)}`; // Escaping user input to prevent SQL injection
     connection.query(query, (err, results) => {
@@ -27,8 +30,11 @@ app.get('/user', (req, res) => {
     });
 });
 
-// Command Injection Vulnerable Endpoint
-app.get('/exec', (req, res) => {
+// Command Injection Vulnerable Endpoint with rate limiting
+app.get('/exec', rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // max 100 requests per windowMs
+}), (req, res) => {
     const cmd = req.query.cmd;
     const cmdArgs = shellQuote.parse(cmd);
     exec(cmdArgs[0], cmdArgs.slice(1), (err, stdout, stderr) => { // Executing command safely using the provided input
@@ -40,19 +46,14 @@ app.get('/exec', (req, res) => {
     });
 });
 
-// Insecure Random Number Generation
-app.get('/random', (req, res) => {
+// Insecure Random Number Generation with rate limiting
+app.get('/random', rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // max 100 requests per windowMs
+}), (req, res) => {
     const randomNumber = Math.random(); // Insecure random number generation
     res.send(`Random number: ${randomNumber}`);
 });
-
-// Apply rate limiting middleware to all endpoints
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // max 100 requests per windowMs
-});
-
-app.use(limiter);
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
