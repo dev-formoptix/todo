@@ -24,6 +24,14 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
 
+      - name: Verify secrets
+        run: |
+          echo "SONAR_HOST_URL is set to ${SONAR_HOST_URL:0:4}********"
+          echo "SONAR_TOKEN is set to ${SONAR_TOKEN:0:4}********"
+        env:
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
       - name: Analyze with SonarQube
         uses: SonarSource/sonarqube-scan-action@7295e71c9583053f5bf40e9d4068a0c974603ec8
         env:
