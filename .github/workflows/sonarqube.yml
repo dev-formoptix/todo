@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   Analysis:
-    runs-on: [self-hosted, your-label]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
