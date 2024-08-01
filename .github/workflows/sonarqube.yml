@@ -20,7 +20,7 @@ jobs:
 
       - name: Test SonarQube Server Connectivity
         run: |
-          curl -I ${{ secrets.SONAR_HOST_URL }}
+          curl -v ${{ secrets.SONAR_HOST_URL }}
 
       - name: Analyze with SonarQube
         uses: SonarSource/sonarqube-scan-action@v1
