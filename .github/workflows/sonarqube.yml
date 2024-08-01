@@ -18,16 +18,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Verify environment variables
-        run: |
-          echo "SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}"
-          echo "SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}"
-
       - name: Analyze with SonarQube
         uses: SonarSource/sonarqube-scan-action@7295e71c9583053f5bf40e9d4068a0c974603ec8
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # Ensure this secret is added in your GitHub repo settings
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }} # Ensure this secret is added in your GitHub repo settings
         with:
-          args:
+          args: >
             -Dsonar.projectKey=dev-formoptix_todo_7deb2f0f-0cca-4ac0-9a00-14e09259b322
+            -Dsonar.projectName=todo
+            -Dsonar.sources=./src # Adjust this path to point to your source code directory
