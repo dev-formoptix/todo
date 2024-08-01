@@ -24,10 +24,10 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
 
-      - name: Verify secrets
+      - name: Print secrets
         run: |
-          echo "SONAR_HOST_URL is set to ${SONAR_HOST_URL}
-          echo "SONAR_TOKEN is set to ${SONAR_TOKEN}
+          echo "SONAR_HOST_URL is set to $SONAR_HOST_URL"
+          echo "SONAR_TOKEN is set to $SONAR_TOKEN"
         env:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
