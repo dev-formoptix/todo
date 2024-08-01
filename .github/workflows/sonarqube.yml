@@ -26,8 +26,8 @@ jobs:
 
       - name: Verify secrets
         run: |
-          echo "SONAR_HOST_URL is set to ${SONAR_HOST_URL:0:4}********"
-          echo "SONAR_TOKEN is set to ${SONAR_TOKEN:0:4}********"
+          echo "SONAR_HOST_URL is set to ${SONAR_HOST_URL}
+          echo "SONAR_TOKEN is set to ${SONAR_TOKEN}
         env:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
