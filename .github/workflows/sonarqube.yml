@@ -1,4 +1,4 @@
-name: SonarQube Scan
+name: SonarQube Analysis
 
 on:
   push:
@@ -9,34 +9,16 @@ on:
       - main
 
 jobs:
-  sonarqube:
-    name: SonarQube Scan
+  sonar:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up JDK 11
-        uses: actions/setup-java@v2
-        with:
-          java-version: '11'
-
-      - name: Cache SonarQube packages
-        uses: actions/cache@v2
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
       - name: SonarQube Scan
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          curl -sSL https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip > sonar-scanner.zip
-          unzip sonar-scanner.zip -d $HOME
-          export PATH=$HOME/sonar-scanner-4.6.2.2472-linux/bin:$PATH
-          sonar-scanner \
-            -Dsonar.projectKey=dev-formoptix_todo_64d15527-7df3-4387-b0c2-bfa8799e99a2 \
-            -Dsonar.host.url=http://localhost:9000 \
-            -Dsonar.login=$SONAR_TOKEN 
+        uses: sonarsource/sonarcloud-github-action@master
+        with:
+          args: >
+            -Dsonar.projectKey=dev-formoptix_todo_64d15527-7df3-4387-b0c2-bfa8799e99a2
+            -Dsonar.host.url=http://localhost:9000
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
