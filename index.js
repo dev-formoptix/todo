@@ -9,7 +9,7 @@ const port = 3000;
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'passwordd'
+    password: 'passwordd',
     database: 'test' 
 });
 
@@ -18,7 +18,6 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    user()
     const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
     connection.query(query, (err, results) => {
         if (err) throw err;
