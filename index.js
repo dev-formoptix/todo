@@ -47,8 +47,14 @@ app.get('/exec', (req, res) => {
         {exe:"/bin/host", args:["--"]}
     ];
     const cmd = allowedCommands[cmdId];
-    spawnSync(cmd.exe, cmd.args.concat(host)); // Use spawnSync instead of exec to prevent command injection
-    res.send("Command executed successfully");
+
+    // Sanitize host input to prevent command injection
+    if (host.match(/^[\w\.\-\/]+$/)) {
+        spawnSync(cmd.exe, cmd.args.concat(host)); // Use spawnSync instead of exec to prevent command injection
+        res.send("Command executed successfully");
+    } else {
+        res.send("Invalid host input");
+    }
 });
 
 // Insecure Random Number Generation
