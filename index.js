@@ -49,7 +49,7 @@ app.get('/exec', (req, res) => {
     const cmd = allowedCommands[cmdId];
 
     // Sanitize host input to prevent command injection
-    if (host.match(/^[\w\.\-\/]+$/)) {
+    if (typeof host === "string" && host.match(/^[\w\.\-\/]+$/)) {
         spawnSync(cmd.exe, cmd.args.concat(host)); // Use spawnSync instead of exec to prevent command injection
         res.send("Command executed successfully");
     } else {
