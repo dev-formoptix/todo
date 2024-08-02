@@ -1,6 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
+const { spawnSync } = require('child_process');
 
 const app = express();
 const port = 3000;
@@ -18,8 +18,8 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
-    connection.query(query, (err, results) => {
+    const query = `SELECT * FROM users WHERE id = ?`; // Updated to use parameterized query
+    connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
     });
@@ -28,13 +28,25 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
-        }
-        res.send(`Output: ${stdout}`);
-    });
+    const cmdId = parseInt(cmd);
+    let host = req.query.host;
+    host = typeof host === "string"? host : "example.org";
+
+    const allowedCommands = [
+        {exe:"/bin/ping", args:["-c","1","--"]},
+        {exe:"/bin/host", args:["--"]}
+    ]
+
+    const matchedCommand = allowedCommands[cmdId];
+
+    if (matchedCommand) {
+        const args = matchedCommand.args.concat(host);
+        const result = spawnSync(matchedCommand.exe, args);
+        const output = result.stdout ? result.stdout.toString() : result.stderr.toString();
+        res.send(`Output: ${output}`);
+    } else {
+        res.send("Invalid command ID");
+    }
 });
 
 // Insecure Random Number Generation
