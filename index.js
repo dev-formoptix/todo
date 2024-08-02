@@ -57,6 +57,13 @@ app.get('/random', (req, res) => {
     res.send(`Random number: ${randomNumber}`);
 });
 
+// Limit the rate at which requests are accepted
+app.get('/:path', limiter, (req, res) => {
+  let path = req.params.path;
+  if (isValidPath(path))
+    res.sendFile(path);
+});
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
