@@ -53,7 +53,7 @@ jobs:
           args: >
             -Dsonar.projectKey=dev-formoptix_todo
             -Dsonar.organization=dev-formoptix
-            -Dsonar.sources=src # Adjust to your source directory
+            -Dsonar.sources= # Adjust to your source directory
             -Dsonar.tests=test # Adjust to your test directory if applicable
             -Dsonar.inclusions=**/*.java,**/*.js,**/*.py # Include relevant file types
             -Dsonar.coverage.exclusions=**/test/**,**/*.spec.js # Adjust if necessary
