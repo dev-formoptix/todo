@@ -1,4 +1,4 @@
-Here is the updated code for the index.js file based on the vulnerability details:
+The updated code for the index.js file is as follows:
 
 ```javascript
 const express = require('express');
@@ -13,7 +13,7 @@ const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: 'passwordd',
-    database: 'test' 
+    database: 'test'
 });
 
 connection.connect();
