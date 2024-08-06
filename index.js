@@ -5,7 +5,6 @@ const { exec } = require('child_process');
 const app = express();
 const port = 3000;
 
-// MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
     host: process.env.MYSQL_URL,
     user: process.env.MYSQL_USERNAME,
@@ -15,20 +14,18 @@ const connection = mysql.createConnection({
 
 connection.connect();
 
-// SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
-    connection.query(query, (err, results) => {
+    const query = `SELECT * FROM users WHERE id = ?`; // Use parameterized query to prevent SQL injection
+    connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
     });
 });
 
-// Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
+    exec(cmd, (err, stdout, stderr) => {
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
@@ -37,9 +34,8 @@ app.get('/exec', (req, res) => {
     });
 });
 
-// Insecure Random Number Generation
 app.get('/random', (req, res) => {
-    const randomNumber = Math.random(); // Insecure random number generation
+    const randomNumber = Math.random();
     res.send(`Random number: ${randomNumber}`);
 });
 
