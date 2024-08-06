@@ -1,9 +1,10 @@
-Here's the updated code for "index.js" to address the hard-coded credentials vulnerability:
+Here's the updated code for "index.js" to address the missing rate limiting vulnerability:
 
 ```javascript
 const express = require('express');
 const mysql = require('mysql');
 const { spawnSync } = require('child_process');
+const RateLimit = require('express-rate-limit');
 
 const app = express();
 const port = 3000;
@@ -17,6 +18,15 @@ const connection = mysql.createConnection({
 });
 
 connection.connect();
+
+// Set up rate limiter: maximum of 100 requests in 15 minutes
+const limiter = new RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max 100 requests per windowMs
+});
+
+// Apply rate limiter to all requests
+app.use(limiter);
 
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
@@ -62,8 +72,9 @@ app.listen(port, () => {
 ```
 
 Changes made:
-1. Removed the hard-coded credentials and replaced them with environment variables for the MySQL connection setup. The `DB_USER` and `DB_PASSWORD` environment variables should be set externally to securely provide the credentials.
-2. No changes were made to the `/user` and `/exec` endpoints as they are unrelated to the hard-coded credentials vulnerability.
-3. No changes were made to the `/random` endpoint as it is unrelated to the hard-coded credentials vulnerability.
+1. Imported the `express-rate-limit` package.
+2. Created a new `RateLimit` instance with a window of 15 minutes and a maximum of 100 requests per window.
+3. Applied the rate limiter middleware to all requests using `app.use(limiter)`.
+4. No changes were made to the `/user`, `/exec`, and `/random` endpoints as they are unrelated to the missing rate limiting vulnerability.
 
 Please review the changes and make sure to test the code thoroughly to verify its correctness and security.
