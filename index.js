@@ -4,6 +4,7 @@ const { spawn } = require('child_process');
 const app = express();
 const port = 3000;
 
+// Remove the hard-coded credentials and use environment variables to fetch the values
 const connection = mysql.createConnection({
   host: process.env.MYSQL_URL,
   user: process.env.MYSQL_USERNAME,
