@@ -1,6 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
-const { spawn } = require('child_process');
+const { spawnSync } = require('child_process');
 const app = express();
 const port = 3000;
 
@@ -26,25 +26,23 @@ app.get('/user', (req, res) => {
 app.get('/exec', (req, res) => {
   const cmd = req.query.cmd;
   const args = cmd.split(' ');
-  const child = spawn(args[0], args.slice(1), { shell: false }); // Adding { shell: false } to prevent arbitrary OS command injection
+  const result = spawnSync(args[0], args.slice(1), { shell: false }); // Changing spawn to spawnSync and adding { shell: false } to prevent arbitrary OS command injection
 
   let output = '';
 
-  child.stdout.on('data', (data) => {
-      output += data;
-  });
+  if (result.stdout) {
+    output += result.stdout.toString();
+  }
 
-  child.stderr.on('data', (data) => {
-      output += data;
-  });
+  if (result.stderr) {
+    output += result.stderr.toString();
+  }
 
-  child.on('close', (code) => {
-      if (code === 0) {
-          res.send(`Output: ${output}`);
-      } else {
-          res.send(`Error: ${output}`);
-      }
-  });
+  if (result.status === 0) {
+    res.send(`Output: ${output}`);
+  } else {
+    res.send(`Error: ${output}`);
+  }
 });
 
 app.get('/random', (req, res) => {
