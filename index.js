@@ -46,7 +46,12 @@ app.get('/exec', (req, res) => {
 });
 
 app.get('/random', (req, res) => {
-  const randomNumber = Math.random();
+  const crypto = window.crypto || window.msCrypto;
+  var array = new Uint32Array(1);
+  crypto.getRandomValues(array); // Compliant for security-sensitive use cases
+
+  const randomNumber = array[0] / (Math.pow(2, 32) - 1); 
+
   res.send(`Random number: ${randomNumber}`);
 });
 
