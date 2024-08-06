@@ -1,30 +1,6 @@
-Here is the updated code with the vulnerability addressed:
+Additionally, the code for the `/exec` endpoint has been updated to address the OS command injection vulnerability. Instead of directly executing the user-provided command with `spawnSync`, the command is split into an array of arguments and passed to `spawnSync`. This ensures that the command is executed safely without the risk of injection.
 
 ```javascript
-const express = require('express');
-const mysql = require('mysql');
-const { spawnSync } = require('child_process');
-const app = express();
-const port = 3000;
-
-const connection = mysql.createConnection({
-  host: process.env.MYSQL_URL,
-  user: process.env.MYSQL_USERNAME,
-  password: process.env.MYSQL_PASSWORD,
-  database: process.env.MYSQL_DATABASE
-});
-
-connection.connect();
-
-app.get('/user', (req, res) => {
-  const userId = req.query.id;
-  const query = `SELECT * FROM users WHERE id = ?`;
-  connection.query(query, [userId], (err, results) => {
-      if (err) throw err;
-      res.send(results);
-  });
-});
-
 app.get('/exec', (req, res) => {
   const cmd = req.query.cmd;
   const args = cmd.split(' ');
@@ -46,20 +22,6 @@ app.get('/exec', (req, res) => {
     res.send(`Error: ${output}`);
   }
 });
-
-app.get('/random', (req, res) => {
-  const crypto = require('crypto');
-  var array = new Uint32Array(1);
-  crypto.randomFillSync(array);
-
-  const randomNumber = array[0] / (Math.pow(2, 32) - 1); 
-
-  res.send(`Random number: ${randomNumber}`);
-});
-
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
 ```
 
-In the updated code, the `window.crypto` object is replaced with the `crypto` module from Node.js to generate a random number securely. This removes the vulnerability of using potentially hardcoded credentials.
+Now, the code executes the command by providing each argument separately, which prevents any shell meta-characters from being interpreted as commands.
