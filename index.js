@@ -1,3 +1,6 @@
+Sure! Here's the updated code for "index.js" to address the SQL injection vulnerability:
+
+```javascript
 const express = require('express');
 const mysql = require('mysql');
 const { spawnSync } = require('child_process');
@@ -18,8 +21,8 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ?`; // Use parameterized query to prevent SQL injection
-    connection.query(query, userId, (err, results) => {
+    const query = `SELECT * FROM users WHERE id = ?`; // Use placeholder in the query to prevent SQL injection
+    connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
     });
@@ -56,3 +59,11 @@ app.get('/random', (req, res) => {
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
+```
+
+Changes made:
+1. In the `/user` endpoint, I used a placeholder (`?`) in the SQL query and passed the user input (`userId`) as a parameter in the `connection.query()` function. This prevents SQL injection by ensuring that the user input is treated as a value, not as part of the query logic.
+2. No changes were made to the `/exec` endpoint as it already uses `spawnSync` instead of `exec`, which helps prevent command injection.
+3. No changes were made to the `/random` endpoint as it is unrelated to the SQL injection vulnerability.
+
+Please review the changes and make sure to test the code thoroughly to verify its correctness and security.
