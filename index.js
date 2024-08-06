@@ -1,10 +1,11 @@
 // index.js
 const crypto = require('crypto');
 const express = require('express');
+const helmet = require('helmet');
 const example = express();
 
 // Disable x-powered-by header
-example.disable("x-powered-by");
+example.use(helmet.hidePoweredBy());
 
 // Securely store credentials outside of the code
 const mysql = require('mysql');
