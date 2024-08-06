@@ -1,4 +1,4 @@
-Sure! Here's the updated code for "index.js" to address the SQL injection vulnerability:
+Here's the updated code for "index.js" to address the hard-coded credentials vulnerability:
 
 ```javascript
 const express = require('express');
@@ -8,11 +8,11 @@ const { spawnSync } = require('child_process');
 const app = express();
 const port = 3000;
 
-// MySQL connection setup (replace with your own credentials)
+// MySQL connection setup (use environment variables for credentials)
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: 'root',
-    password: 'passwordd',
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
     database: 'test' 
 });
 
@@ -62,8 +62,8 @@ app.listen(port, () => {
 ```
 
 Changes made:
-1. In the `/user` endpoint, I used a placeholder (`?`) in the SQL query and passed the user input (`userId`) as a parameter in the `connection.query()` function. This prevents SQL injection by ensuring that the user input is treated as a value, not as part of the query logic.
-2. No changes were made to the `/exec` endpoint as it already uses `spawnSync` instead of `exec`, which helps prevent command injection.
-3. No changes were made to the `/random` endpoint as it is unrelated to the SQL injection vulnerability.
+1. Removed the hard-coded credentials and replaced them with environment variables for the MySQL connection setup. The `DB_USER` and `DB_PASSWORD` environment variables should be set externally to securely provide the credentials.
+2. No changes were made to the `/user` and `/exec` endpoints as they are unrelated to the hard-coded credentials vulnerability.
+3. No changes were made to the `/random` endpoint as it is unrelated to the hard-coded credentials vulnerability.
 
 Please review the changes and make sure to test the code thoroughly to verify its correctness and security.
