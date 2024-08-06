@@ -1,50 +1,66 @@
 const express = require('express');
 const mysql = require('mysql');
 const { spawnSync } = require('child_process');
+const { QueryTypes } = require('sequelize');
 
 const app = express();
 const port = 3000;
 
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'passwordd',
-    database: 'test' 
+  host: 'localhost',
+  user: 'root',
+  password: 'passwordd',
+  database: 'test',
 });
 
 connection.connect();
 
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
-    const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ?`;
-    connection.query(query, [userId], (err, results) => {
-        if (err) throw err;
-        res.send(results);
-    });
+  const userId = req.query.id;
+  const query = 'SELECT * FROM users WHERE id = ?';
+  connection.query(query, [userId], (err, results) => {
+    if (err) throw err;
+    res.send(results);
+  });
 });
 
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
-    const cmd = req.query.cmd;
-    const args = cmd.split(" ");
-    const result = spawnSync(args[0], args.slice(1));
-    const stdout = result.stdout.toString();
-    const stderr = result.stderr.toString();
-    if (stderr) {
-        res.send(`Error: ${stderr}`);
-        return;
-    }
-    res.send(`Output: ${stdout}`);
+  const cmd = req.query.cmd;
+  const args = cmd.split(' ');
+  const result = spawnSync(args[0], args.slice(1));
+  const stdout = result.stdout.toString();
+  const stderr = result.stderr.toString();
+  if (stderr) {
+    res.send(`Error: ${stderr}`);
+    return;
+  }
+  res.send(`Output: ${stdout}`);
 });
 
 // Insecure Random Number Generation
 app.get('/random', (req, res) => {
-    const randomNumber = Math.random(); // Insecure random number generation
-    res.send(`Random number: ${randomNumber}`);
+  const randomNumber = Math.random(); // Insecure random number generation
+  res.send(`Random number: ${randomNumber}`);
 });
 
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+  console.log(`Server running at http://localhost:${port}`);
+});
+
+//Fixing the SQL Injection Vulnerability
+app.get('/user', async (req, res) => {
+  const userId = req.query.id;
+  const query = 'SELECT * FROM users WHERE id = $userId';
+  try {
+    const loggedInUser = await db.query(query, {
+      bind: { userId },
+      type: QueryTypes.SELECT,
+    });
+    res.send(loggedInUser);
+  } catch (err) {
+    res.send(`Error: ${err}`);
+  }
 });
