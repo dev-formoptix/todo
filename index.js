@@ -1,30 +1,48 @@
-// index.js
-const crypto = require('crypto');
 const express = require('express');
-const helmet = require('helmet');
-const example = express();
-
-// Disable x-powered-by header
-example.use(helmet.hidePoweredBy());
-
-// Securely store credentials outside of the code
 const mysql = require('mysql');
+const { exec } = require('child_process');
 
+const app = express();
+const port = 3000;
+
+// MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
-  host: process.env.MYSQL_URL,
-  user: process.env.MYSQL_USERNAME,
-  password: process.env.MYSQL_PASSWORD,
-  database: process.env.MYSQL_DATABASE
+    host: 'localhost',
+    user: 'root',
+    password: 'passwordd',
+    database: 'test' 
 });
+
 connection.connect();
 
-// Rest of the code goes here
-...
+// SQL Injection Vulnerable Endpoint
+app.get('/user', (req, res) => {
+    const userId = req.query.id;
+    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+    connection.query(query, (err, results) => {
+        if (err) throw err;
+        res.send(results);
+    });
+});
 
-// Make sure that using a pseudorandom number generator is safe here
-const randomValue = crypto.randomBytes(1).toString('hex'); // Compliant
+// Command Injection Vulnerable Endpoint
+app.get('/exec', (req, res) => {
+    const cmd = req.query.cmd;
+    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
+        if (err) {
+            res.send(`Error: ${stderr}`);
+            return;
+        }
+        res.send(`Output: ${stdout}`);
+    });
+});
 
-// Make sure that executing this OS command is safe here
-const cp = require('child_process');
+// Insecure Random Number Generation
+app.get('/random', (req, res) => {
+    const randomNumber = Math.random(); // Insecure random number generation
+    res.send(`Random number: ${randomNumber}`);
+});
 
-cp.spawnSync("/usr/bin/file.exe", { shell: false }); // Compliant
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+});
