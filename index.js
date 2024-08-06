@@ -1,7 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
 const { spawn } = require('child_process');
-
 const app = express();
 const port = 3000;
 
