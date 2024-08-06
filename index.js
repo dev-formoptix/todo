@@ -1,5 +1,9 @@
+Here is the updated code with rate limiting implemented:
+
+```javascript
 const express = require('express');
 const { spawnSync } = require('child_process');
+const RateLimit = require('express-rate-limit');
 
 const app = express();
 const allowedCommands = [
@@ -18,10 +22,9 @@ const allowedCommands = [
 ];
 
 // set up rate limiter: maximum of five requests per minute
-const RateLimit = require('express-rate-limit');
 const limiter = RateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // max 100 requests per windowMs
+  max: 5, // max 5 requests per windowMs
 });
 
 // apply rate limiter to all requests
@@ -82,3 +85,5 @@ app.listen(3000, function() {
   console.log('App listening on port 3000');
 });
 ```
+
+In this updated code, I added the `express-rate-limit` package and created a rate limiter using `RateLimit` with a maximum of 5 requests per 15 minutes window. This rate limiter is then applied to all requests using `app.use(limiter)`.
