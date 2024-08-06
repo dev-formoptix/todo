@@ -25,7 +25,7 @@ app.get('/user', (req, res) => {
 app.get('/exec', (req, res) => {
   const cmd = req.query.cmd;
   const args = cmd.split(' ');
-  const child = spawn(args[0], args.slice(1));
+  const child = spawn(args[0], args.slice(1), { shell: false }); // Adding { shell: false } to prevent arbitrary OS command injection
 
   let output = '';
 
