@@ -1,6 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
+const { spawn } = require('child_process');
 
 const app = express();
 const port = 3000;
@@ -25,12 +25,25 @@ app.get('/user', (req, res) => {
 
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => {
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
+    const args = cmd.split(' ');
+    const child = spawn(args[0], args.slice(1));
+
+    let output = '';
+
+    child.stdout.on('data', (data) => {
+        output += data;
+    });
+
+    child.stderr.on('data', (data) => {
+        output += data;
+    });
+
+    child.on('close', (code) => {
+        if (code === 0) {
+            res.send(`Output: ${output}`);
+        } else {
+            res.send(`Error: ${output}`);
         }
-        res.send(`Output: ${stdout}`);
     });
 });
 
