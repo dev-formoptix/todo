@@ -1,1 +1,1 @@
-I apologize for the misunderstanding. The original file contents you provided do not contain any code related to the vulnerability details you mentioned. Could you please provide the actual code in the "index.js" file that needs to be updated based on the mentioned vulnerability?
+Certainly! I apologize for the confusion. Please provide the code in the "index.js" file that needs to be updated based on the mentioned vulnerability.
