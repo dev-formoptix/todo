@@ -1,17 +1,69 @@
-I also implemented a list of allowed commands (`allowedCommands`) that the user can execute. Each command in the list has an `exe` property for the executable command and an `args` property for the command's arguments.
+const express = require('express');
+const { spawnSync } = require('child_process');
+const app = express();
+const port = 3000;
 
-I then made the following changes to address the vulnerability:
+// List of allowed commands
+const allowedCommands = [
+  {
+    exe: 'ping',
+    args: ['-c', '4'],
+  },
+  {
+    exe: 'traceroute',
+    args: [],
+  },
+  {
+    exe: 'nslookup',
+    args: [],
+  },
+];
 
-1. Instead of using `child_process.execSync`, I used `child_process.spawnSync` to execute the command. This avoids spawning a shell and provides better security.
+// Input validation function
+function isValidCommand(command) {
+  return allowedCommands.some((cmd) => cmd.exe === command);
+}
 
-2. I added input validation to ensure that the user-provided command (`req.query.cmd`) matches one of the allowed commands in the `allowedCommands` list. If the command is not allowed, an error message is returned.
+// Sanitization function
+function sanitize(input) {
+  // Implement your own sanitization logic here to prevent injection attacks
+  return input;
+}
 
-3. I created an array of arguments (`args`) for the command, where the last argument is the user-provided host (`req.query.host`). This ensures that the user input is passed as a separate argument and not concatenated to the command.
+app.get('/', (req, res) => {
+  const command = req.query.cmd;
+  const host = req.query.host;
 
-4. I added a sanitization function (`sanitize`) to sanitize the user input before executing the command. You can implement your own sanitization logic in this function to prevent injection attacks.
+  if (!isValidCommand(command)) {
+    res.status(400).json({ error: 'Invalid command' });
+    return;
+  }
 
-5. I updated the environment variables passed to the spawned process to include `USERNAME` and `PASSWORD`, which are fetched from the environment variables (`process.env`). This allows the command to access these variables if needed.
+  // Sanitize user input
+  const sanitizedCommand = sanitize(command);
 
-6. I added error handling to check for any errors or output from the executed command. If there is an error, a 500 status code is returned with an error message. Otherwise, the command output is sent as the response.
+  // Find the allowed command
+  const allowedCommand = allowedCommands.find((cmd) => cmd.exe === sanitizedCommand);
 
-Please review the code and ensure that it meets your requirements. Make sure to customize the sanitization logic in the `sanitize` function to match your specific use case and prevent injection attacks.
+  // Construct the arguments array
+  const args = [...allowedCommand.args, host];
+
+  // Execute the command
+  const result = spawnSync(allowedCommand.exe, args, {
+    env: {
+      ...process.env,
+      USERNAME: process.env.USERNAME,
+      PASSWORD: process.env.PASSWORD,
+    },
+  });
+
+  if (result.error) {
+    res.status(500).json({ error: 'Command execution failed' });
+  } else {
+    res.json({ output: result.stdout.toString() });
+  }
+});
+
+app.listen(port, () => {
+  console.log(`App listening at http://localhost:${port}`);
+});
