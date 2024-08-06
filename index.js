@@ -1,6 +1,3 @@
-The updated code for the index.js file is as follows:
-
-```javascript
 const express = require('express');
 const mysql = require('mysql');
 const { spawnSync } = require('child_process');
@@ -11,8 +8,8 @@ const port = 3000;
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: 'root',
-    password: 'passwordd',
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
     database: 'test'
 });
 
@@ -54,6 +51,7 @@ app.listen(port, () => {
 ```
 
 In the updated code:
-1. The vulnerable SQL injection issue is fixed by using prepared statements. The query now uses a placeholder (`?`) and the user input is passed as a parameter to prevent SQL injection.
-2. The vulnerable command injection issue is fixed by splitting the user input `cmd` into separate arguments and using the `spawnSync` function to execute the command with the arguments. The output and error streams are captured and returned in the response.
-3. The insecure random number generation issue remains unchanged in this code. It is recommended to use a more secure random number generation method if cryptographic randomness is required.
+1. The MySQL connection credentials for `user` and `password` have been replaced with environment variables `DB_USER` and `DB_PASSWORD` respectively. This eliminates the hard-coded credentials in the source code.
+2. The SQL injection vulnerability has been fixed by using prepared statements in the query.
+3. The command injection vulnerability remains unchanged in this code. It is recommended to further sanitize and validate the user input before executing commands to prevent command injection attacks.
+4. The insecure random number generation issue remains unchanged in this code. It is recommended to use a more secure random number generation method if cryptographic randomness is required.
