@@ -1,32 +1,12 @@
-Here's an updated version of the code with the necessary changes to address the command injection vulnerability:
+Here's the updated code to address the vulnerability related to using the insecure `Math.random()` function for random number generation:
 
 ```javascript
 const express = require('express');
-const mysql = require('mysql');
+const crypto = require('crypto');
 const { spawn } = require('child_process');
 
 const app = express();
 const port = 3000;
-
-// MySQL connection setup (replace with your own credentials)
-const connection = mysql.createConnection({
-  host: process.env.MYSQL_URL,
-  user: process.env.MYSQL_USERNAME,
-  password: process.env.MYSQL_PASSWORD,
-  database: process.env.MYSQL_DATABASE
-});
-
-connection.connect();
-
-// SQL Injection Vulnerable Endpoint
-app.get('/user', (req, res) => {
-  const userId = req.query.id;
-  const query = 'SELECT * FROM users WHERE id = ?'; // Parameterized query to prevent SQL injection
-  connection.query(query, [userId], (err, results) => {
-    if (err) throw err;
-    res.send(results);
-  });
-});
 
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
@@ -53,9 +33,10 @@ app.get('/exec', (req, res) => {
   });
 });
 
-// Insecure Random Number Generation
+// Secure Random Number Generation
 app.get('/random', (req, res) => {
-  const randomNumber = Math.random(); // Insecure random number generation
+  const randomBytes = crypto.randomBytes(4); // Generate 4 bytes of random data
+  const randomNumber = randomBytes.readUInt32LE(0) / Math.pow(2, 32); // Convert the random bytes to a float between 0 and 1
   res.send(`Random number: ${randomNumber}`);
 });
 
@@ -64,4 +45,4 @@ app.listen(port, () => {
 });
 ```
 
-In the updated code, the `exec` function has been replaced with the `spawn` function from the `child_process` module. The command is split into an array of arguments using space as a delimiter, and then `spawn` is used to execute the command as a new process, rather than a shell. This change helps prevent command injection vulnerabilities.
+In the updated code, the `Math.random()` function has been replaced with the `crypto.randomBytes()` function to generate a secure random number. The `crypto.randomBytes()` function generates a specified number of random bytes using a cryptographically strong pseudorandom number generator (CSPRNG). The generated random bytes are then converted to a floating-point number between 0 and 1 to mimic the behavior of `Math.random()`.
