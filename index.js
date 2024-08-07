@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const { exec } = require('child_process');
 const { spawn } = require('child_process');
 
+const crypto = require('crypto');
 const app = express();
 const port = 3000;
 
