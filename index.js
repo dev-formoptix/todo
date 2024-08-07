@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
 const { spawn } = require('child_process');
+const helmet = require("helmet");
 
 const crypto = require('crypto');
 const app = express();
@@ -17,6 +18,9 @@ const connection = mysql.createConnection({
 
 connection.connect();
 
+// Disable x-powered-by header
+app.disable("x-powered-by");
+
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
@@ -29,3 +33,19 @@ app.get('/user', (req, res) => {
 
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
+    const command = req.query.command;
+    exec(command, (error, stdout, stderr) => {
+        if (error) {
+            res.send(error.message);
+        } else {
+            res.send(stdout);
+        }
+    });
+});
+
+// Secure version information disclosure using helmet
+app.use(helmet.hidePoweredBy());
+
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
