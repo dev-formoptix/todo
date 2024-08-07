@@ -1,6 +1,7 @@
 const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
+const { spawn } = require('child_process');
 
 const app = express();
 const port = 3000;
@@ -27,22 +28,3 @@ app.get('/user', (req, res) => {
 
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
-    const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
-        }
-        res.send(`Output: ${stdout}`);
-    });
-});
-
-// Insecure Random Number Generation
-app.get('/random', (req, res) => {
-    const randomNumber = Math.random(); // Insecure random number generation
-    res.send(`Random number: ${randomNumber}`);
-});
-
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
-});
