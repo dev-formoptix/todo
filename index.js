@@ -1,6 +1,7 @@
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
+const { spawnSync } = require('child_process');
+const path = require('path');
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -30,13 +31,15 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
-        }
-        res.send(`Output: ${stdout}`);
-    });
+    const cmdArgs = cmd.split(' ');
+    const cmdPath = path.resolve(cmdArgs[0]);
+    cmdArgs.shift();
+    const result = spawnSync(cmdPath, cmdArgs, { shell: false }); // Execute command without spawning a shell
+    if (result.error) {
+        res.send(`Error: ${result.error.message}`);
+        return;
+    }
+    res.send(`Output: ${result.stdout}`);
 });
 
 // Insecure Random Number Generation
