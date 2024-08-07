@@ -1,6 +1,7 @@
 const express = require('express');
 const mysql = require('mysql');
 const { spawn } = require('child_process');
+const crypto = require('crypto'); // Added crypto module
 
 const app = express();
 const port = 3000;
@@ -44,9 +45,9 @@ app.get('/exec', (req, res) => {
     });
 });
 
-// Insecure Random Number Generation
+// Secure Random Number Generation
 app.get('/random', (req, res) => {
-    const randomNumber = Math.random(); // Insecure random number generation
+    const randomNumber = crypto.randomBytes(4).readUInt32LE(0) / 4294967295; // Secure random number generation
     res.send(`Random number: ${randomNumber}`);
 });
 
