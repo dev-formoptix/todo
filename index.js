@@ -1,19 +1,23 @@
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
+const { spawn } = require('child_process');
+const crypto = require('crypto'); // Added crypto module
 
 const app = express();
 const port = 3000;
 
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'password',
-    database: 'test' 
+    host: process.env.MYSQL_HOST,
+    user: process.env.MYSQL_USERNAME,
+    password: process.env.MYSQL_PASSWORD,
+    database: process.env.MYSQL_DATABASE 
 });
 
 connection.connect();
+
+// Disable x-powered-by header
+app.disable("x-powered-by");
 
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
@@ -28,18 +32,25 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
-        }
-        res.send(`Output: ${stdout}`);
+    const args = cmd.split(' '); // Split command into arguments
+    const childProcess = spawn(args[0], args.slice(1)); // Use spawn to execute command
+      
+    childProcess.stdout.on('data', (data) => {
+        res.send(`Output: ${data}`);
+    });
+    
+    childProcess.stderr.on('data', (data) => {
+        res.send(`Error: ${data}`);
+    });
+    
+    childProcess.on('close', (code) => {
+        console.log(`Child process exited with code ${code}`);
     });
 });
 
-// Insecure Random Number Generation
+// Secure Random Number Generation
 app.get('/random', (req, res) => {
-    const randomNumber = Math.random(); // Insecure random number generation
+    const randomNumber = crypto.randomBytes(4).readUInt32LE(0) / 4294967295; // Secure random number generation
     res.send(`Random number: ${randomNumber}`);
 });
 
