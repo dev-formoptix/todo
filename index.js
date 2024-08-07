@@ -1,6 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
+const { spawn } = require('child_process');
 
 const app = express();
 const port = 3000;
@@ -28,12 +28,19 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
-        }
-        res.send(`Output: ${stdout}`);
+    const args = cmd.split(' '); // Split command into arguments
+    const childProcess = spawn(args[0], args.slice(1)); // Use spawn to execute command
+      
+    childProcess.stdout.on('data', (data) => {
+        res.send(`Output: ${data}`);
+    });
+    
+    childProcess.stderr.on('data', (data) => {
+        res.send(`Error: ${data}`);
+    });
+    
+    childProcess.on('close', (code) => {
+        console.log(`Child process exited with code ${code}`);
     });
 });
 
