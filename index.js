@@ -1,8 +1,12 @@
+The code needs to be updated to use a cryptographically strong pseudorandom number generator (CSPRNG) instead of `Math.random()`, which is a weak PRNG. Here's the updated code:
+
+```javascript
 const express = require('express');
 const mysql = require('mysql');
 const { spawnSync } = require('child_process');
 const path = require('path');
 const dotenv = require('dotenv');
+const crypto = require('crypto');
 dotenv.config();
 
 const app = express();
@@ -42,12 +46,20 @@ app.get('/exec', (req, res) => {
     res.send(`Output: ${result.stdout}`);
 });
 
-// Insecure Random Number Generation
+// Secure Random Number Generation
 app.get('/random', (req, res) => {
-    const randomNumber = Math.random(); // Insecure random number generation
+    const array = new Uint32Array(1);
+    crypto.randomFillSync(array);
+    const randomNumber = array[0] / (2**32); // Normalize to range [0, 1)
     res.send(`Random number: ${randomNumber}`);
 });
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
+```
+
+In the updated code:
+1. The `crypto` module is imported to use a cryptographically strong pseudorandom number generator.
+2. The `/random` endpoint now uses `crypto.randomFillSync()` to generate a secure random number. It uses `new Uint32Array(1)` to generate a 32-bit unsigned integer and then divides it by `(2**32)` to normalize the number to the range [0, 1).
+3. The original code is preserved for the vulnerable SQL injection and command injection endpoints. However, it is recommended to address these vulnerabilities as well.
