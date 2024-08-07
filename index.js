@@ -1,7 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
-const { spawn } = require('child_process');
+const { execFile, spawnSync } = require('child_process');
 const helmet = require("helmet");
 
 const crypto = require('crypto');
@@ -34,7 +33,7 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const command = req.query.command;
-    exec(command, (error, stdout, stderr) => {
+    execFile(command, (error, stdout, stderr) => {
         if (error) {
             res.send(error.message);
         } else {
