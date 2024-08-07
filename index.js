@@ -1,25 +1,19 @@
 const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
-const { spawn } = require('child_process');
-const helmet = require("helmet");
 
-const crypto = require('crypto');
 const app = express();
 const port = 3000;
 
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
-    host: process.env.MYSQL_URL,
-    user: process.env.MYSQL_USERNAME,
-    password: process.env.MYSQL_PASSWORD,
-    database: process.env.MYSQL_DATABASE 
+    host: 'localhost',
+    user: 'root',
+    password: 'password',
+    database: 'test' 
 });
 
 connection.connect();
-
-// Disable x-powered-by header
-app.disable("x-powered-by");
 
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
@@ -33,19 +27,22 @@ app.get('/user', (req, res) => {
 
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
-    const command = req.query.command;
-    exec(command, (error, stdout, stderr) => {
-        if (error) {
-            res.send(error.message);
-        } else {
-            res.send(stdout);
+    const cmd = req.query.cmd;
+    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
+        if (err) {
+            res.send(`Error: ${stderr}`);
+            return;
         }
+        res.send(`Output: ${stdout}`);
     });
 });
 
-// Secure version information disclosure using helmet
-app.use(helmet.hidePoweredBy());
+// Insecure Random Number Generation
+app.get('/random', (req, res) => {
+    const randomNumber = Math.random(); // Insecure random number generation
+    res.send(`Random number: ${randomNumber}`);
+});
 
 app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+    console.log(`Server running at http://localhost:${port}`);
 });
