@@ -16,6 +16,9 @@ const connection = mysql.createConnection({
 
 connection.connect();
 
+// Disable x-powered-by header
+app.disable("x-powered-by");
+
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
