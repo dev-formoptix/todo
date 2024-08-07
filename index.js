@@ -1,6 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
+const { spawn } = require('child_process');
 
 const app = express();
 const port = 3000;
@@ -18,8 +18,8 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
-    connection.query(query, (err, results) => {
+    const query = `SELECT * FROM users WHERE id = ?`; // Use parameterized query to prevent SQL injection
+    connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
     });
@@ -28,12 +28,24 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
+    const child = spawn(cmd, { shell: false }); // Use spawn with shell: false to prevent command injection
+    let output = '';
+    let error = '';
+
+    child.stdout.on('data', (data) => {
+        output += data;
+    });
+
+    child.stderr.on('data', (data) => {
+        error += data;
+    });
+
+    child.on('close', (code) => {
+        if (code === 0) {
+            res.send(`Output: ${output}`);
+        } else {
+            res.send(`Error: ${error}`);
         }
-        res.send(`Output: ${stdout}`);
     });
 });
 
