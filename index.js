@@ -1,12 +1,14 @@
-Here's the updated code to address the vulnerability related to using the insecure `Math.random()` function for random number generation:
-
 ```javascript
 const express = require('express');
 const crypto = require('crypto');
 const { spawn } = require('child_process');
+const helmet = require('helmet');
 
 const app = express();
 const port = 3000;
+
+app.disable("x-powered-by");
+app.use(helmet.hidePoweredBy());
 
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
@@ -45,4 +47,4 @@ app.listen(port, () => {
 });
 ```
 
-In the updated code, the `Math.random()` function has been replaced with the `crypto.randomBytes()` function to generate a secure random number. The `crypto.randomBytes()` function generates a specified number of random bytes using a cryptographically strong pseudorandom number generator (CSPRNG). The generated random bytes are then converted to a floating-point number between 0 and 1 to mimic the behavior of `Math.random()`.
+In addition to addressing the version disclosure vulnerability, the code also includes the `helmet` middleware to enhance the security of the application by adding various HTTP headers. The `app.disable("x-powered-by")` statement disables the `x-powered-by` header, and the `app.use(helmet.hidePoweredBy())` statement adds further protection by hiding the powered-by information in the response headers.
