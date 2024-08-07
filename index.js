@@ -1,6 +1,9 @@
+Here's an updated version of the code with the necessary changes to address the command injection vulnerability:
+
+```javascript
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
+const { spawn } = require('child_process');
 
 const app = express();
 const port = 3000;
@@ -28,12 +31,25 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
   const cmd = req.query.cmd;
-  exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
-    if (err) {
-      res.send(`Error: ${stderr}`);
+  const args = cmd.split(' ');
+  const proc = spawn(args[0], args.slice(1), { shell: false }); // Execute command as a new process, not a shell
+  let output = '';
+  let error = '';
+
+  proc.stdout.on('data', (data) => {
+    output += data;
+  });
+
+  proc.stderr.on('data', (data) => {
+    error += data;
+  });
+
+  proc.on('close', (code) => {
+    if (code !== 0) {
+      res.send(`Error: ${error}`);
       return;
     }
-    res.send(`Output: ${stdout}`);
+    res.send(`Output: ${output}`);
   });
 });
 
@@ -46,3 +62,6 @@ app.get('/random', (req, res) => {
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
+```
+
+In the updated code, the `exec` function has been replaced with the `spawn` function from the `child_process` module. The command is split into an array of arguments using space as a delimiter, and then `spawn` is used to execute the command as a new process, rather than a shell. This change helps prevent command injection vulnerabilities.
