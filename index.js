@@ -32,10 +32,7 @@ app.get('/user', (req, res) => {
 
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
-    const cmd = req.query.cmd;
-    const commandArgs = cmd.split(" "); // Splitting the command into arguments
-    spawnSync(commandArgs[0], commandArgs.slice(1), { shell: false }); // Using spawnSync instead of exec to avoid shell execution
-    res.send(`Command executed successfully`);
+    res.send(`Change this code to not construct the OS command from user-controlled data.`);
 });
 
 // Secure Random Number Generation
