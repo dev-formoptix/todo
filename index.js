@@ -4,7 +4,7 @@ const { spawn } = require('child_process');
 const crypto = require('crypto');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000; // Added process.env.PORT to allow dynamic port binding
 
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
@@ -28,30 +28,6 @@ app.get('/user', (req, res) => {
 
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
-    const cmd = req.query.cmd;
-    // const args = cmd.split(' '); // Remove this line to prevent constructing the OS command from user-controlled data
-
-    // const childProcess = spawn(args[0], args.slice(1));
-
-    // let output = '';
-    // let error = '';
-
-    // childProcess.stdout.on('data', (data) => {
-    //     output += data;
-    // });
-
-    // childProcess.stderr.on('data', (data) => {
-    //     error += data;
-    // });
-
-    // childProcess.on('close', (code) => {
-    //     if (code !== 0) {
-    //         res.send(`Error: ${error}`);
-    //     } else {
-    //         res.send(`Output: ${output}`);
-    //     }
-    // });
-
     res.send('Code has been changed to prevent constructing the OS command from user-controlled data.');
 });
 
