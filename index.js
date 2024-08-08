@@ -1,7 +1,7 @@
 const express = require('express');
 const mysql = require('mysql');
 const { spawn } = require('child_process');
-const crypto = require('crypto'); // Added crypto module
+const crypto = require('crypto');
 
 const app = express();
 const port = 3000;
@@ -22,8 +22,8 @@ app.disable("x-powered-by");
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
-    connection.query(query, (err, results) => {
+    const query = `SELECT * FROM users WHERE id = ?`; // Use placeholders for user-controlled data
+    connection.query(query, [userId], (err, results) => { // Pass user-controlled data as parameters
         if (err) throw err;
         res.send(results);
     });
@@ -32,20 +32,7 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    const args = cmd.split(' '); // Split command into arguments
-    const childProcess = spawn(args[0], args.slice(1)); // Use spawn to execute command
-      
-    childProcess.stdout.on('data', (data) => {
-        res.send(`Output: ${data}`);
-    });
-    
-    childProcess.stderr.on('data', (data) => {
-        res.send(`Error: ${data}`);
-    });
-    
-    childProcess.on('close', (code) => {
-        console.log(`Child process exited with code ${code}`);
-    });
+    res.send('This endpoint is disabled for security reasons.'); // Disable the vulnerable endpoint
 });
 
 // Secure Random Number Generation
