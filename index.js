@@ -24,8 +24,8 @@ app.disable('x-powered-by');
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
-    connection.query(query, (err, results) => {
+    const query = 'SELECT * FROM users WHERE id = ?'; // Change to use prepared statements
+    connection.query(query, [userId], (err, results) => { // Pass userId as a parameter
         if (err) throw err;
         res.send(results);
     });
@@ -67,4 +67,6 @@ app.listen(port, () => {
 });
 ```
 
-In this updated code, the `app.disable('x-powered-by')` statement has been added to disable the `x-powered-by` header. This prevents the disclosure of version information through the header.
+In the updated code, the SQL injection vulnerability has been addressed by using prepared statements. The SQL query has been changed to `SELECT * FROM users WHERE id = ?` and the `userId` variable is passed as a parameter to the `connection.query` method.
+
+However, the command injection vulnerability and secure random number generation remain unchanged. It is recommended to review and address these vulnerabilities as well.
