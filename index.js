@@ -33,13 +33,7 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    const command = cmd.split(" ");
-    const result = spawnSync(command[0], command.slice(1)); // Avoid spawning a shell to prevent command injection
-    if (result.error) {
-        res.send(`Error: ${result.error.message}`);
-        return;
-    }
-    res.send(`Output: ${result.stdout}`);
+    res.send('Command execution is currently disabled.');
 });
 
 // Secure Random Number Generation
