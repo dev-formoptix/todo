@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql');
 const { execSync } = require('child_process');
 const { QueryTypes } = require('sequelize');
+const RateLimit = require('express-rate-limit');
 
 const app = express();
 const port = 3000;
@@ -15,6 +16,15 @@ const connection = mysql.createConnection({
 });
 
 connection.connect();
+
+// Rate limiting setup with maximum of 100 requests per 15 minutes
+const limiter = RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // max 100 requests per windowMs
+});
+
+// Apply rate limiter to all requests
+app.use(limiter);
 
 // SQL Injection Vulnerable Endpoint
 app.get('/user', async (req, res) => {
