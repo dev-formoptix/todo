@@ -28,8 +28,6 @@ app.get('/user', (req, res) => {
 
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
-    const cmd = req.query.cmd;
-
     res.send('Code has been changed to prevent constructing the OS command from user-controlled data.');
 });
 
