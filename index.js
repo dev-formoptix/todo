@@ -1,7 +1,3 @@
-To address the pseudorandom number generator vulnerability, we need to replace the usage of `Math.random()` with a cryptographically strong pseudorandom number generator (CSPRNG) like `crypto.randomBytes()`.
-
-Here's the updated code for the `index.js` file:
-
 ```javascript
 const express = require('express');
 const mysql = require('mysql');
@@ -21,6 +17,9 @@ const connection = mysql.createConnection({
 });
 
 connection.connect();
+
+// Disable x-powered-by header
+app.disable('x-powered-by');
 
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
@@ -68,6 +67,4 @@ app.listen(port, () => {
 });
 ```
 
-In the updated code, we have added the `crypto` module and used the `crypto.randomBytes()` function to generate a secure random number. The generated random bytes are then converted to a floating-point number between 0 and 1 by dividing them with the maximum possible value of a 32-bit unsigned integer.
-
-This addresses the vulnerability mentioned and ensures that a cryptographically strong pseudorandom number generator is used.
+In this updated code, the `app.disable('x-powered-by')` statement has been added to disable the `x-powered-by` header. This prevents the disclosure of version information through the header.
