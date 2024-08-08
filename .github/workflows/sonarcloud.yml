@@ -1,0 +1,53 @@
+name: SonarCloud analysis
+
+on:
+  push:
+    branches: [ "main" ]
+    
+permissions:
+  pull-requests: read # allows SonarCloud to decorate PRs with analysis results
+
+jobs:
+  Analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+
+      - name: Cache SonarCloud scanner
+        id: cache-sonarscanner
+        uses: actions/cache@v2
+        with:
+          path: ~/.sonar/sonar-scanner
+          key: ${{ runner.os }}-sonar-scanner
+
+      - name: Download SonarCloud scanner
+        if: steps.cache-sonarscanner.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/.sonar/sonar-scanner
+          curl -sSLo ~/.sonar/sonar-scanner/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
+          unzip -o ~/.sonar/sonar-scanner/sonar-scanner.zip -d ~/.sonar/sonar-scanner/
+          mv ~/.sonar/sonar-scanner/sonar-scanner-4.6.2.2472-linux ~/.sonar/sonar-scanner/bin
+          echo "$HOME/.sonar/sonar-scanner/bin/sonar-scanner-4.6.2.2472-linux/bin" >> $GITHUB_PATH
+
+      - name: Analyze with SonarCloud
+        uses: SonarSource/sonarcloud-github-action@v2.2.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # Add your token in GitHub repository secrets
+        with:
+          args: >
+            -Dsonar.projectKey=dev-formoptix_todo
+            -Dsonar.organization=dev-formoptix
+          projectBaseDir: .
