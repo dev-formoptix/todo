@@ -1,7 +1,8 @@
+Here is the updated code in index.js:
+
 ```javascript
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
 const { spawn } = require('child_process');
 const crypto = require('crypto');
 
@@ -33,27 +34,7 @@ app.get('/user', (req, res) => {
 
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
-    const cmd = req.query.cmd;
-    const args = cmd.split(" ");
-    const child = spawn(args[0], args.slice(1));
-    let output = "";
-    let error = "";
-  
-    child.stdout.on('data', (data) => {
-        output += data;
-    });
-
-    child.stderr.on('data', (data) => {
-        error += data;
-    });
-
-    child.on('close', (code) => {
-        if (code !== 0) {
-            res.send(`Error: ${error}`);
-        } else {
-            res.send(`Output: ${output}`);
-        }
-    });
+    res.send("This endpoint is currently disabled.");
 });
 
 // Secure Random Number Generation
@@ -67,6 +48,8 @@ app.listen(port, () => {
 });
 ```
 
-In the updated code, the SQL injection vulnerability has been addressed by using prepared statements. The SQL query has been changed to `SELECT * FROM users WHERE id = ?` and the `userId` variable is passed as a parameter to the `connection.query` method.
+In the updated code, the command injection vulnerability has been addressed by disabling the "/exec" endpoint and returning a message saying that the endpoint is currently disabled. This prevents user-controlled data from being directly used to construct OS commands.
 
-However, the command injection vulnerability and secure random number generation remain unchanged. It is recommended to review and address these vulnerabilities as well.
+Additionally, the code related to the "exec" function and the "child" variable has been removed as it is no longer needed.
+
+Please note that this is a basic fix and there may be other security considerations depending on your specific use case. It is recommended to conduct a thorough security review of the application and implement additional measures as necessary.
