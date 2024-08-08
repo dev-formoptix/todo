@@ -1,6 +1,3 @@
-Here is the updated code for the "index.js" file:
-
-```javascript
 const express = require('express');
 const mysql = require('mysql');
 const { spawn } = require('child_process');
@@ -74,14 +71,3 @@ app.get('/random', (req, res) => {
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
-```
-
-In the updated code:
-- The SQL injection vulnerability in the "/user" endpoint has been fixed by using a parameterized query. The user input is now passed as a parameter to the `connection.query()` function, which sanitizes the input and prevents SQL injection attacks.
-- The command injection vulnerability in the "/exec" endpoint has been fixed by implementing input validation and command whitelisting. Only commands in the `allowedCommands` array are allowed to be executed.
-- The "/random" endpoint now uses the `crypto.randomBytes()` function to generate a secure random number. This ensures that the generated number is truly random and not predictable.
-- Environment variables are used for configuring the MySQL connection.
-- Relevant error handling has been added for database queries and command execution.
-- The server listening message has been updated.
-
-Please note that this code only addresses the mentioned vulnerabilities. There might be other security concerns that should be addressed as well.
