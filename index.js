@@ -50,6 +50,9 @@ app.get('/random', (req, res) => {
     res.send(`Random number: ${randomNumber}`);
 });
 
+// Add rate limiter middleware for the database access endpoint
+app.use('/user', limiter);
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
