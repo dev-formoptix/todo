@@ -1,8 +1,10 @@
+// Required dependencies
 const express = require('express');
 const mysql = require('mysql');
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 const { QueryTypes } = require('sequelize');
 const RateLimit = require('express-rate-limit');
+const shellQuote = require('shell-quote');
 
 const app = express();
 const port = 3000;
@@ -39,8 +41,8 @@ app.get('/user', async (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    const args = cmd.split(' '); // Split command into arguments
-    const result = execSync(args[0], args.slice(1)); // Execute command and arguments
+    const cmdArgs = shellQuote.parse(cmd); // Parse command into arguments array
+    const result = execFileSync(cmdArgs[0], cmdArgs.slice(1)); // Execute command and arguments
     res.send(result.toString());
 });
 
