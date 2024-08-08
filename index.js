@@ -4,7 +4,7 @@ const { spawn } = require('child_process');
 const crypto = require('crypto');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000; // Added process.env.PORT to allow dynamic port binding
 
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
