@@ -9,8 +9,8 @@ const port = process.env.PORT || 3000; // Added process.env.PORT to allow dynami
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
     host: process.env.MYSQL_URL,
-    user: process.env.MYSQL_USERNAME,
-    password: process.env.MYSQL_PASSWORD,
+    user: 'testuser',
+    password: 'password',
     database: process.env.MYSQL_DATABASE
 });
 
