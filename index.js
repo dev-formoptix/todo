@@ -61,6 +61,9 @@ app.get('/random', (req, res) => {
     res.send(`Random number: ${randomNumber}`);
 });
 
+// Disable x-powered-by header
+app.disable('x-powered-by');
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
