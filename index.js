@@ -1,6 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
+const { spawnSync } = require('child_process');
 
 const app = express();
 const port = 3000;
@@ -28,13 +28,13 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
-        }
-        res.send(`Output: ${stdout}`);
-    });
+    const command = cmd.split(" ");
+    const result = spawnSync(command[0], command.slice(1)); // Avoid spawning a shell to prevent command injection
+    if (result.error) {
+        res.send(`Error: ${result.error.message}`);
+        return;
+    }
+    res.send(`Output: ${result.stdout}`);
 });
 
 // Insecure Random Number Generation
