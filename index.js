@@ -22,8 +22,8 @@ app.disable("x-powered-by");
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ?`; // Use placeholders for user-controlled data
-    connection.query(query, [userId], (err, results) => { // Pass user-controlled data as parameters
+    const query = `SELECT * FROM users WHERE id = ?`;
+    connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
     });
@@ -37,7 +37,7 @@ app.get('/exec', (req, res) => {
 
 // Secure Random Number Generation
 app.get('/random', (req, res) => {
-    const randomNumber = crypto.randomBytes(4).readUInt32LE(0) / 4294967295; // Secure random number generation
+    const randomNumber = crypto.randomBytes(4).readUInt32LE(0) / 4294967295;
     res.send(`Random number: ${randomNumber}`);
 });
 
