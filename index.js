@@ -2,9 +2,13 @@ const express = require('express');
 const mysql = require('mysql');
 const { spawnSync } = require('child_process');
 const crypto = require('crypto');
+const helmet = require('helmet');
 
 const app = express();
 const port = 3000;
+
+// Disable x-powered-by header
+app.disable('x-powered-by');
 
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
@@ -19,7 +23,7 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+    const query = `SELECT * FROM users WHERE id = ${connection.escape(userId)}`; // Prevent SQL injection by escaping user input
     connection.query(query, (err, results) => {
         if (err) throw err;
         res.send(results);
@@ -44,6 +48,8 @@ app.get('/random', (req, res) => {
     const randomNumber = buf[0] / 255; // Normalize to get a random number between 0 and 1
     res.send(`Random number: ${randomNumber}`);
 });
+
+app.use(helmet.hidePoweredBy()); // Use helmet's hidePoweredBy middleware to hide the x-powered-by header
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
