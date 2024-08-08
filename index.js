@@ -1,6 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
+const { execSync } = require('child_process');
 const { QueryTypes } = require('sequelize');
 
 const app = express();
@@ -29,13 +29,9 @@ app.get('/user', async (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // TODO: Implement command injection prevention
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
-        }
-        res.send(`Output: ${stdout}`);
-    });
+    const args = cmd.split(' '); // Split command into arguments
+    const result = execSync(args[0], args.slice(1)); // Execute command and arguments
+    res.send(result.toString());
 });
 
 // Insecure Random Number Generation
