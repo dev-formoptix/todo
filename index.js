@@ -1,7 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
-
 const app = express();
 const port = 3000;
 
@@ -15,13 +14,32 @@ const connection = mysql.createConnection({
 
 connection.connect();
 
+// Safe Query Building Function
+function buildQuery(query, params) {
+    return mysql.format(query, params);
+}
+
+// Safe Query Execution Helper Function
+function executeQuery(query, params, callback) {
+    connection.query(query, params, (err, results) => {
+        if (err) {
+            callback(err, null);
+        } else {
+            callback(null, results);
+        }
+    });
+}
+
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
-    connection.query(query, (err, results) => {
-        if (err) throw err;
-        res.send(results);
+    const query = buildQuery('SELECT * FROM users WHERE id = ?', [userId]); // Safe query building
+    executeQuery(query, [], (err, results) => { // Safe query execution
+        if (err) {
+            res.status(500).send('Internal Server Error');
+        } else {
+            res.send(results);
+        }
     });
 });
 
