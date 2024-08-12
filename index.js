@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql');
 const { spawn } = require('child_process');
 const crypto = require('crypto');
+const RateLimit = require('express-rate-limit');
 
 const app = express();
 const port = 3000;
@@ -66,6 +67,15 @@ app.get('/random', (req, res) => {
   const randomNumber = randomBytes.readUInt32BE(0);
   res.json({ random: randomNumber });
 });
+
+// Set up rate limiter: maximum of five requests per minute
+const limiter = RateLimit({
+  windowMs: 60 * 1000,
+  max: 5,
+});
+
+// Apply rate limiter to all requests
+app.use(limiter);
 
 // Start the server
 app.listen(port, () => {
