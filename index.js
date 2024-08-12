@@ -1,6 +1,7 @@
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
+const { execFileSync } = require('child_process');
+const shellQuote = require('shell-quote');
 
 const app = express();
 const port = 3000;
@@ -18,7 +19,7 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+    const query = `SELECT * FROM users WHERE id = ${connection.escape(userId)}`; // Escaping user input to prevent SQL injection
     connection.query(query, (err, results) => {
         if (err) throw err;
         res.send(results);
@@ -28,13 +29,13 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
-        }
-        res.send(`Output: ${stdout}`);
-    });
+    const args = shellQuote.parse(cmd); // Parsing user input using shell-quote
+    try {
+        const result = execFileSync(args[0], args.slice(1)); // Executing the command safely
+        res.send(`Output: ${result}`);
+    } catch (err) {
+        res.send(`Error: ${err.stderr}`);
+    }
 });
 
 // Insecure Random Number Generation
