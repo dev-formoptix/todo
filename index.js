@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
 const crypto = require('crypto');
+const helmet = require("helmet");
 
 const app = express();
 const port = 3000;
@@ -15,6 +16,9 @@ const connection = mysql.createConnection({
 });
 
 connection.connect();
+
+// Disable x-powered-by header
+app.disable("x-powered-by");
 
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
@@ -45,6 +49,8 @@ app.get('/random', (req, res) => {
   const randomNumber = array[0] / (Math.pow(2, 32) - 1); // Secure random number generation
   res.send(`Random number: ${randomNumber}`);
 });
+
+app.use(helmet.hidePoweredBy());
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
