@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
 const helmet = require("helmet");
+const crypto = require('crypto');
 
 const app = express();
 const port = 3000;
@@ -39,9 +40,10 @@ app.get('/exec', (req, res) => {
     });
 });
 
-// Insecure Random Number Generation
+// Secure Random Number Generation
 app.get('/random', (req, res) => {
-    const randomNumber = Math.random(); // Insecure random number generation
+    const buf = crypto.randomBytes(1); // Use a cryptographically strong pseudorandom number generator
+    const randomNumber = buf[0] / 255; // Convert the random byte to a number between 0 and 1
     res.send(`Random number: ${randomNumber}`);
 });
 
