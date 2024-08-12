@@ -1,30 +1,4 @@
-const express = require('express');
-const mysql = require('mysql');
-const { exec } = require('child_process');
-const crypto = require('crypto');
-
-const app = express();
-const port = 3000;
-
-// MySQL connection setup (replace with your own credentials)
-const connection = mysql.createConnection({
-  host: process.env.MYSQL_URL,
-  user: process.env.MYSQL_USERNAME,
-  password: process.env.MYSQL_PASSWORD,
-  database: process.env.MYSQL_DATABASE
-});
-
-connection.connect();
-
-// SQL Injection Vulnerable Endpoint
-app.get('/user', (req, res) => {
-  const userId = req.query.id;
-  const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
-  connection.query(query, (err, results) => {
-    if (err) throw err;
-    res.send(results);
-  });
-});
+// ...
 
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
@@ -38,14 +12,26 @@ app.get('/exec', (req, res) => {
   });
 });
 
-// Insecure Random Number Generation
-app.get('/random', (req, res) => {
-  const array = new Uint32Array(1);
-  crypto.randomFillSync(array);
-  const randomNumber = array[0] / (Math.pow(2, 32) - 1); // Secure random number generation
-  res.send(`Random number: ${randomNumber}`);
+// ...
+
+// Command Injection Vulnerable Endpoint
+app.get('/exec', (req, res) => {
+  const cmd = req.query.cmd;
+  const sanitizedCmd = sanitizeCommand(cmd); // Sanitize the command
+  exec(sanitizedCmd, (err, stdout, stderr) => {
+    if (err) {
+      res.send(`Error: ${stderr}`);
+      return;
+    }
+    res.send(`Output: ${stdout}`);
+  });
 });
 
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
+function sanitizeCommand(cmd) {
+  // Add your sanitization logic here
+  // ...
+
+  return sanitizedCmd;
+}
+
+// ...
