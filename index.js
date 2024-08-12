@@ -3,34 +3,26 @@
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
   const cmd = req.query.cmd;
-  exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
-    if (err) {
-      res.send(`Error: ${stderr}`);
-      return;
-    }
-    res.send(`Output: ${stdout}`);
-  });
-});
-
-// ...
-
-// Command Injection Vulnerable Endpoint
-app.get('/exec', (req, res) => {
-  const cmd = req.query.cmd;
   const sanitizedCmd = sanitizeCommand(cmd); // Sanitize the command
-  exec(sanitizedCmd, (err, stdout, stderr) => {
+  
+  // Constructing SQL queries directly from user-controlled data is vulnerable to SQL injection.
+  // Instead, use parameterized queries or ORMs to interact with the database.
+  const query = `SELECT * FROM users WHERE username = ?`;
+  
+  db.query(query, [sanitizedCmd], (err, rows) => {
     if (err) {
-      res.send(`Error: ${stderr}`);
+      res.send(`Error: ${err.message}`);
       return;
     }
-    res.send(`Output: ${stdout}`);
+    
+    res.send(rows);
   });
 });
 
 function sanitizeCommand(cmd) {
   // Add your sanitization logic here
   // ...
-
+  
   return sanitizedCmd;
 }
 
