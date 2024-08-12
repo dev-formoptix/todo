@@ -7,10 +7,10 @@ const port = 3000;
 
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
-    host: process.env.MYSQL_URL,
-    user: process.env.MYSQL_USERNAME,
-    password: process.env.MYSQL_PASSWORD,
-    database: process.env.MYSQL_DATABASE
+    host: 'localhost',
+    user: 'root',
+    password: 'password',
+    database: 'test'
 });
 
 connection.connect();
@@ -39,7 +39,8 @@ app.get('/exec', (req, res) => {
 
 // Insecure Random Number Generation
 app.get('/random', (req, res) => {
-    const randomNumber = Math.random(); // Insecure random number generation
+    const crypto = require('crypto');
+    const randomNumber = crypto.randomBytes(4).readUInt32LE(0) / 4294967295; // Secure random number generation
     res.send(`Random number: ${randomNumber}`);
 });
 
