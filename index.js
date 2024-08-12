@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
 const helmet = require("helmet");
+const crypto = require('crypto');
 
 const app = express();
 const port = 3000;
@@ -29,20 +30,21 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    // const sanitizedCmd = cmd.replace(/[;&|'`$]/g, ""); // Remove shell meta characters from the command
-    // exec(sanitizedCmd, (err, stdout, stderr) => { // Use a sanitized command to prevent command injection
-    //     if (err) {
-    //         res.send(`Error: ${stderr}`);
-    //         return;
-    //     }
-    //     res.send(`Output: ${stdout}`);
-    // });
-    res.send('This endpoint has been disabled for security reasons');
+    const sanitizedCmd = cmd.replace(/[;&|'`$]/g, ""); // Remove shell meta characters from the command
+    exec(sanitizedCmd, (err, stdout, stderr) => { // Use a sanitized command to prevent command injection
+        if (err) {
+            res.send(`Error: ${stderr}`);
+            return;
+        }
+        res.send(`Output: ${stdout}`);
+    });
 });
 
-// Insecure Random Number Generation
+// Secure Random Number Generation
 app.get('/random', (req, res) => {
-    const randomNumber = Math.random(); // Insecure random number generation
+    const array = new Uint32Array(1);
+    crypto.getRandomValues(array); // Use cryptographically strong pseudorandom number generator
+    const randomNumber = array[0] / (0xffffffff + 1); // Normalize the random value to between 0 and 1
     res.send(`Random number: ${randomNumber}`);
 });
 
