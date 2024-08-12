@@ -1,9 +1,13 @@
 const express = require('express');
 const mysql = require('mysql');
 const { spawn } = require('child_process');
+const helmet = require('helmet');
 
 const app = express();
 const port = 3000;
+
+// Disable x-powered-by header
+app.disable('x-powered-by');
 
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
@@ -57,6 +61,9 @@ app.get('/random', (req, res) => {
     const randomNumber = buffer.readUInt32BE(0) / Math.pow(2, 32); // Secure random number generation
     res.send(`Random number: ${randomNumber}`);
 });
+
+// Apply helmet middleware
+app.use(helmet());
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
