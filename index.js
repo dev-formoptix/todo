@@ -6,11 +6,11 @@ const shellQuote = require('shell-quote');
 const app = express();
 const port = 3000;
 
-// MySQL connection setup (replace with your own credentials)
+// MySQL connection setup (replace with your own credential)
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: 'root',
-    password: 'password',
+    user: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
     database: 'test'
 });
 
