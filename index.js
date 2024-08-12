@@ -1,16 +1,20 @@
 const express = require('express');
 const mysql = require('mysql');
-const { execFile } = require('child_process');
+const { exec } = require('child_process');
+const helmet = require('helmet');
 
 const app = express();
 const port = 3000;
 
+// Disable x-powered-by header
+app.disable('x-powered-by');
+
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'password',
-    database: 'test' 
+    host: process.env.MYSQL_HOST,
+    user: process.env.MYSQL_USERNAME,
+    password: process.env.MYSQL_PASSWORD,
+    database: process.env.MYSQL_DATABASE
 });
 
 connection.connect();
@@ -28,7 +32,7 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    execFile(cmd, (err, stdout, stderr) => { // Modified to use execFile instead of exec
+    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
