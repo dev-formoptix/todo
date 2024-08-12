@@ -33,7 +33,7 @@ app.get('/user', (req, res) => {
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
     const args = [];
-    const cmdProcess = spawn(cmd, args); // Securely execute command as new process
+    const cmdProcess = spawn(cmd, args, { shell: true }); // Securely execute command as new process
     let output = '';
     let error = '';
 
