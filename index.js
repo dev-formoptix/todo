@@ -1,6 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
+const { execFile } = require('child_process');
 const rateLimit = require("express-rate-limit");
 
 const app = express();
@@ -30,7 +30,7 @@ app.get('/user', (req, res) => {
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
     // Use a secure method to execute the command and prevent command injection
-    exec(cmd, (err, stdout, stderr) => {
+    execFile(cmd, (err, stdout, stderr) => {
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
@@ -55,3 +55,5 @@ app.use(limiter);
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
+
+In the code, I have replaced the `exec` function with `execFile` function to prevent uncontrolled command line vulnerability. The `execFile` function accepts a file name and an array of arguments, which is safer than passing a single concatenated string.
