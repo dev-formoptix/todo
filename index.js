@@ -1,73 +1,48 @@
 const express = require('express');
 const mysql = require('mysql');
-const { spawn } = require('child_process');
-const crypto = require('crypto');
+const { exec } = require('child_process');
 
 const app = express();
 const port = 3000;
 
-// MySQL connection setup using environment variables
+// MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_DATABASE
+    host: 'localhost',
+    user: 'root',
+    password: 'password',
+    database: 'test' 
 });
 
-connection.connect((error) => {
-  if (error) {
-    console.error('Error connecting to MySQL:', error);
-  } else {
-    console.log('Connected to MySQL database');
-  }
+connection.connect();
+
+// SQL Injection Vulnerable Endpoint
+app.get('/user', (req, res) => {
+    const userId = req.query.id;
+    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+    connection.query(query, (err, results) => {
+        if (err) throw err;
+        res.send(results);
+    });
 });
 
-// Endpoint to get user data, fixed SQL injection vulnerability
-app.get('/user/:id', (req, res) => {
-  const userId = req.params.id;
-
-  const query = 'SELECT * FROM users WHERE id = ?';
-  connection.query(query, [userId], (error, results) => {
-    if (error) {
-      console.error('Error executing MySQL query:', error);
-      res.status(500).send('Internal Server Error');
-    } else {
-      res.json(results);
-    }
-  });
-});
-
-// Endpoint to execute a command, fixed command injection vulnerability
+// Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
-  const cmd = req.query.cmd;
-
-  // Add command whitelisting to restrict allowed commands
-  const allowedCommands = ['ls', 'pwd', 'echo'];
-  if (!allowedCommands.includes(cmd)) {
-    res.status(400).send('Invalid command');
-    return;
-  }
-
-  const child = spawn(cmd);
-
-  let output = '';
-  child.stdout.on('data', (data) => {
-    output += data.toString();
-  });
-
-  child.on('close', (code) => {
-    res.send(output);
-  });
+    const cmd = req.query.cmd;
+    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
+        if (err) {
+            res.send(`Error: ${stderr}`);
+            return;
+        }
+        res.send(`Output: ${stdout}`);
+    });
 });
 
-// Endpoint to generate a random number using crypto module
+// Insecure Random Number Generation
 app.get('/random', (req, res) => {
-  const randomBytes = crypto.randomBytes(4);
-  const randomNumber = randomBytes.readUInt32BE(0);
-  res.json({ random: randomNumber });
+    const randomNumber = Math.random(); // Insecure random number generation
+    res.send(`Random number: ${randomNumber}`);
 });
 
-// Start the server
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+    console.log(`Server running at http://localhost:${port}`);
 });
