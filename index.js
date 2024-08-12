@@ -1,8 +1,8 @@
 const express = require('express');
 const mysql = require('mysql');
-const { execFile } = require('child_process');
+const { execFileSync } = require('child_process');
 const rateLimit = require("express-rate-limit");
-
+const shellQuote = require('shell-quote');
 const app = express();
 const port = 3000;
 
@@ -30,13 +30,7 @@ app.get('/user', (req, res) => {
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
     // Use a secure method to execute the command and prevent command injection
-    execFile(cmd, (err, stdout, stderr) => {
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
-        }
-        res.send(`Output: ${stdout}`);
-    });
+    execFileSync(...shellQuote.parse(cmd)); // execute command as an array of arguments
 });
 
 // Insecure Random Number Generation
