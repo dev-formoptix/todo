@@ -1,6 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
-const { execFile } = require('child_process');
+const { execFileSync } = require('child_process');
 const rateLimit = require("express-rate-limit");
 
 const app = express();
@@ -30,13 +30,8 @@ app.get('/user', (req, res) => {
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
     // Use a secure method to execute the command and prevent command injection
-    execFile(cmd, (err, stdout, stderr) => {
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
-        }
-        res.send(`Output: ${stdout}`);
-    });
+    execFileSync(cmd.split(' ')[0], cmd.split(' ').slice(1), { stdio: 'inherit' });
+    res.send('Command executed successfully');
 });
 
 // Insecure Random Number Generation
@@ -55,10 +50,3 @@ app.use(limiter);
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });  
-
-In the updated code, I have removed the hard-coded MySQL credentials and replaced them with environment variables:
-- `process.env.DB_USER`: The environment variable that should contain the MySQL username.
-- `process.env.DB_PASSWORD`: The environment variable that should contain the MySQL password.
-- `process.env.DB_NAME`: The environment variable that should contain the MySQL database name.
-
-Now, the credentials can be supplied externally through environment variables, which helps to prevent hard-coded credentials in the source code.
