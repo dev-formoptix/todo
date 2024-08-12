@@ -51,6 +51,12 @@ app.get('/random', (req, res) => {
     res.send(`Random number: ${randomNumber}`);
 });
 
+// Updated Endpoint with Rate Limiting
+app.get('/secure', limiter, (req, res) => {
+    // perform secure operation
+    res.send("Secure operation performed");
+});
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
