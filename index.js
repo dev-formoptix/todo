@@ -6,6 +6,9 @@ const crypto = require('crypto');
 const app = express();
 const port = 3000;
 
+// Disable x-powered-by header
+app.disable('x-powered-by');
+
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
     host: 'localhost',
