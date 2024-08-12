@@ -1,63 +1,42 @@
 const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
-const { spawn } = require('child_process');
 
 const app = express();
 const port = 3000;
 
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'password',
-    database: 'test' 
+  host: process.env.MYSQL_URL,
+  user: process.env.MYSQL_USERNAME,
+  password: process.env.MYSQL_PASSWORD,
+  database: process.env.MYSQL_DATABASE
 });
 
 connection.connect();
 
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
-    const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
-    connection.query(query, (err, results) => {
-        if (err) throw err;
-        res.send(results);
-    });
+  const userId = req.query.id;
+  const query = 'SELECT * FROM users WHERE id = ?'; // Change to use parameterized queries
+  connection.query(query, [userId], (err, results) => {
+    if (err) throw err;
+    res.send(results);
+  });
 });
 
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
-    const cmd = req.query.cmd;
-    const command = cmd.split(' ')[0];
-    const args = cmd.split(' ').slice(1);
-    const childProcess = spawn(command, args, { shell: false }); // Secure command execution
-    let output = '';
-    let error = '';
-
-    childProcess.stdout.on('data', (data) => {
-        output += data;
-    });
-
-    childProcess.stderr.on('data', (data) => {
-        error += data;
-    });
-
-    childProcess.on('close', (code) => {
-        if (code === 0) {
-            res.send(`Output: ${output}`);
-        } else {
-            res.send(`Error: ${error}`);
-        }
-    });
+  const cmd = req.query.cmd;
+  res.send(`Please provide a safe command.`);
 });
 
 // Insecure Random Number Generation
 app.get('/random', (req, res) => {
-    const randomNumber = Math.random(); // Insecure random number generation
-    res.send(`Random number: ${randomNumber}`);
+  const randomNumber = Math.random(); // Insecure random number generation
+  res.send(`Random number: ${randomNumber}`);
 });
 
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+  console.log(`Server running at http://localhost:${port}`);
 });
