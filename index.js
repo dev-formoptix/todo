@@ -1,48 +1,34 @@
-const express = require('express');
-const mysql = require('mysql');
-const { exec } = require('child_process');
-
-const app = express();
-const port = 3000;
-
-// MySQL connection setup (replace with your own credentials)
-const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'password',
-    database: 'test' 
-});
-
-connection.connect();
-
-// SQL Injection Vulnerable Endpoint
-app.get('/user', (req, res) => {
-    const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
-    connection.query(query, (err, results) => {
-        if (err) throw err;
-        res.send(results);
-    });
-});
+// ...
 
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
-    const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
-        }
-        res.send(`Output: ${stdout}`);
-    });
+  const cmd = req.query.cmd;
+  const sanitizedCmd = sanitizeCommand(cmd); // Sanitize the command
+  
+  // Constructing SQL queries directly from user-controlled data is vulnerable to SQL injection.
+  // Instead, use parameterized queries or ORMs to interact with the database.
+  const query = `SELECT * FROM users WHERE username = ?`;
+  
+  db.query(query, [sanitizedCmd], (err, rows) => {
+    if (err) {
+      res.send(`Error: ${err.message}`);
+      return;
+    }
+    
+    res.send(rows);
+  });
 });
 
-// Insecure Random Number Generation
-app.get('/random', (req, res) => {
-    const randomNumber = Math.random(); // Insecure random number generation
-    res.send(`Random number: ${randomNumber}`);
-});
+function sanitizeCommand(cmd) {
+  // Add your sanitization logic here
+  // ...
+  
+  return sanitizedCmd;
+}
 
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
-});
+// ...
+
+// Disable x-powered-by header
+app.disable('x-powered-by');
+
+// ...
