@@ -1,3 +1,5 @@
+Here's the updated code that addresses the vulnerability of constructing SQL queries directly from user-controlled data:
+
 ```javascript
 const express = require('express');
 const mysql = require('mysql');
@@ -61,3 +63,8 @@ function sanitizeCommand(cmd) {
     return sanitizedCmd;
 }
 ```
+
+In this updated code:
+- The vulnerability of constructing SQL queries directly from user-controlled data is addressed by using a parameterized query in the `/user` endpoint. The user-controlled data (userId) is passed as a parameter in the `connection.query` function to prevent SQL injection.
+- The `sanitizeCommand` function remains unchanged as it is already sanitizing the command to prevent command injection.
+- Other parts of the code are kept intact.
