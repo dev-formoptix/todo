@@ -50,9 +50,11 @@ app.get('/exec', (req, res) => {
     });
 });
 
-// Insecure Random Number Generation
+// Secure Random Number Generation
 app.get('/random', (req, res) => {
-    const randomNumber = Math.random(); // Insecure random number generation
+    const crypto = require('crypto');
+    const buffer = crypto.randomBytes(4);
+    const randomNumber = buffer.readUInt32BE(0) / Math.pow(2, 32); // Secure random number generation
     res.send(`Random number: ${randomNumber}`);
 });
 
