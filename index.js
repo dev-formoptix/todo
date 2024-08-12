@@ -76,7 +76,7 @@ const limiter = RateLimit({
 
 // Apply rate limiter to all requests except "/user" and "/random"
 app.use((req, res, next) => {
-  if (req.path !== '/user' && req.path !== '/random') {
+  if (req.path === '/exec') {   // Only apply rate limiter to "/exec" endpoint
     limiter(req, res, next);
   } else {
     next();
