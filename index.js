@@ -35,3 +35,8 @@ function sanitizeCommand(cmd) {
 }
 
 // ...
+
+// Disable x-powered-by header
+app.disable('x-powered-by');
+
+// ...
