@@ -1,58 +1,49 @@
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
-const RateLimit = require('express-rate-limit');
+const { execFileSync } = require('child_process');
+const shellQuote = require('shell-quote');
 
 const app = express();
 const port = 3000;
 
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'password',
-  database: 'test'
+    host: 'localhost',
+    user: 'root',
+    password: 'password',
+    database: 'test'
 });
 
 connection.connect();
 
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
-  const userId = req.query.id;
-  const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
-  connection.query(query, (err, results) => {
-    if (err) throw err;
-    res.send(results);
-  });
+    const userId = req.query.id;
+    const query = `SELECT * FROM users WHERE id = ${connection.escape(userId)}`; // Escaping user input to prevent SQL injection
+    connection.query(query, (err, results) => {
+        if (err) throw err;
+        res.send(results);
+    });
 });
 
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
-  const cmd = req.query.cmd;
-  exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
-    if (err) {
-      res.send(`Error: ${stderr}`);
-      return;
+    const cmd = req.query.cmd;
+    const args = shellQuote.parse(cmd); // Parsing user input to prevent command injection
+    try {
+        const output = execFileSync(args[0], args.slice(1));
+        res.send(`Output: ${output}`);
+    } catch (err) {
+        res.send(`Error: ${err.message}`);
     }
-    res.send(`Output: ${stdout}`);
-  });
 });
 
 // Insecure Random Number Generation
 app.get('/random', (req, res) => {
-  const randomNumber = Math.random(); // Insecure random number generation
-  res.send(`Random number: ${randomNumber}`);
+    const randomNumber = Math.random(); // Insecure random number generation
+    res.send(`Random number: ${randomNumber}`);
 });
-
-// Rate Limit Middleware
-const limiter = RateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // max 100 requests per windowMs
-});
-
-// Apply rate limiter to all requests
-app.use(limiter);
 
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+    console.log(`Server running at http://localhost:${port}`);
 });
