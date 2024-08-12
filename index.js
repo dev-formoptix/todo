@@ -74,14 +74,8 @@ const limiter = RateLimit({
   max: 100, // max 100 requests per windowMs
 });
 
-// Apply rate limiter to all requests except the /exec endpoint
-app.use((req, res, next) => {
-  if (req.path === '/exec') {
-    next();
-  } else {
-    limiter(req, res, next);
-  }
-});
+// Apply rate limiter to all requests
+app.use(limiter);
 
 // Start the server
 app.listen(port, () => {
