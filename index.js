@@ -1,3 +1,6 @@
+Here is the updated code in "index.js" to address the mentioned vulnerability:
+
+```javascript
 const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
@@ -21,8 +24,8 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
-    connection.query(query, (err, results) => {
+    const query = 'SELECT * FROM users WHERE id = ?'; // Use parameterized queries to prevent SQL injection
+    connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
     });
@@ -43,10 +46,16 @@ app.get('/exec', (req, res) => {
 // Insecure Random Number Generation
 app.get('/random', (req, res) => {
     const crypto = require('crypto');
-    const randomNumber = crypto.randomBytes(4).readUInt32LE(0) / 4294967295; // Secure random number generation
+    const randomNumber = crypto.randomUInt32LE(0) / 4294967295; // Use crypto.randomUInt32LE for secure random number generation
     res.send(`Random number: ${randomNumber}`);
 });
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
+```
+
+Changes made:
+- Modified the SQL query in the `/user` endpoint to use parameterized queries instead of constructing the query directly from user-controlled data. This prevents SQL injection vulnerabilities.
+- No changes were made to the `/exec` endpoint, as it is outside the scope of the mentioned vulnerability and can be secured separately.
+- Modified the random number generation in the `/random` endpoint to use `crypto.randomUInt32LE` for secure random number generation.
