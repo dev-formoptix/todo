@@ -7,10 +7,8 @@ const helmet = require("helmet");
 const app = express();
 const port = 3000;
 
-// Disable x-powered-by header
 app.disable("x-powered-by");
 
-// MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -20,7 +18,6 @@ const connection = mysql.createConnection({
 
 connection.connect();
 
-// SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
     const query = 'SELECT * FROM users WHERE id = ?';
@@ -30,11 +27,9 @@ app.get('/user', (req, res) => {
     });
 });
 
-// Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    // Fix: Use a whitelist of allowed commands instead of executing user-controlled data directly
-    const allowedCommands = ['echo', 'ls', 'pwd']; // Add more commands as needed
+    const allowedCommands = ['echo', 'ls', 'pwd'];
     if (allowedCommands.includes(cmd)) {
         exec(cmd, (err, stdout, stderr) => {
             if (err) {
@@ -48,10 +43,9 @@ app.get('/exec', (req, res) => {
     }
 });
 
-// Secure Random Number Generation
 app.get('/random', (req, res) => {
     const buf = crypto.randomBytes(4);
-    const randomNumber = buf.readUInt32BE(0) / 0xffffffff; // Secure random number generation
+    const randomNumber = buf.readUInt32BE(0) / 0xffffffff;
     res.send(`Random number: ${randomNumber}`);
 });
 
