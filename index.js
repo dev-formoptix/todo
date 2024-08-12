@@ -70,8 +70,8 @@ app.get('/random', (req, res) => {
 
 // Set up rate limiter: maximum of five requests per minute
 const limiter = RateLimit({
-  windowMs: 60 * 1000,
-  max: 5,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max 100 requests per windowMs
 });
 
 // Apply rate limiter to all requests
