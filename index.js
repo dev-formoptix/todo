@@ -1,6 +1,7 @@
 const express = require('express');
 const mysql = require('mysql');
-const { execFile } = require('child_process');
+const { exec } = require('child_process');
+const crypto = require('crypto');
 
 const app = express();
 const port = 3000;
@@ -28,7 +29,7 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    execFile(cmd, (err, stdout, stderr) => { // Modified to use execFile instead of exec
+    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
@@ -37,9 +38,10 @@ app.get('/exec', (req, res) => {
     });
 });
 
-// Insecure Random Number Generation
+// Secure Random Number Generation
 app.get('/random', (req, res) => {
-    const randomNumber = Math.random(); // Insecure random number generation
+    const buf = crypto.randomBytes(4);
+    const randomNumber = buf.readUInt32BE(0) / 0xffffffff; // Secure random number generation
     res.send(`Random number: ${randomNumber}`);
 });
 
