@@ -74,8 +74,14 @@ const limiter = RateLimit({
   max: 100, // max 100 requests per windowMs
 });
 
-// Apply rate limiter to all requests
-app.use(limiter);
+// Apply rate limiter to all requests except "/user" and "/random"
+app.use((req, res, next) => {
+  if (req.path !== '/user' && req.path !== '/random') {
+    limiter(req, res, next);
+  } else {
+    next();
+  }
+});
 
 // Start the server
 app.listen(port, () => {
