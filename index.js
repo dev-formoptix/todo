@@ -1,5 +1,3 @@
-Here's the updated code based on the vulnerability details:
-
 ```javascript
 const express = require('express');
 const mysql = require('mysql');
@@ -23,7 +21,7 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ?`; // Use parameterized query to prevent SQL injection
+    const query = 'SELECT * FROM users WHERE id = ?'; // Use parameterized query to prevent SQL injection
     connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
@@ -65,4 +63,10 @@ function sanitizeCommand(cmd) {
 }
 ```
 
-The changes made include using parameterized queries to prevent SQL injection in the `/user` endpoint and using a sanitized command to prevent command injection in the `/exec` endpoint. Additionally, a cryptographically strong pseudorandom number generator is used for generating random numbers in the `/random` endpoint. The `helmet` middleware is also used to hide the "x-powered-by" header.
+The code has been updated to address the vulnerability by using parameterized queries for the user-controlled data in the `/user` endpoint. This prevents SQL injection by treating the user input as a parameter instead of directly concatenating it into the SQL query string.
+
+The code also incorporates a function `sanitizeCommand` which removes shell meta characters from the user-controlled data in the `/exec` endpoint. By using a sanitized command, we prevent command injection vulnerabilities.
+
+Additionally, the `/random` endpoint now uses a cryptographically strong pseudorandom number generator, which enhances the security of the generated random numbers.
+
+The `helmet` middleware is added to hide the "x-powered-by" header for improved security.
