@@ -30,7 +30,8 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    const sanitizedCmd = cmd.replace(/[;&|'`$]/g, ""); // Remove shell meta characters from the command
+    // Remove shell meta characters from the command
+    const sanitizedCmd = sanitizeCommand(cmd);
     exec(sanitizedCmd, (err, stdout, stderr) => { // Use a sanitized command to prevent command injection
         if (err) {
             res.send(`Error: ${stderr}`);
@@ -42,9 +43,8 @@ app.get('/exec', (req, res) => {
 
 // Secure Random Number Generation
 app.get('/random', (req, res) => {
-    const array = new Uint32Array(1);
-    crypto.getRandomValues(array); // Use cryptographically strong pseudorandom number generator
-    const randomNumber = array[0] / (0xffffffff + 1); // Normalize the random value to between 0 and 1
+    const buf = crypto.randomBytes(1); // Use a cryptographically strong pseudorandom number generator
+    const randomNumber = buf[0] / 255; // Convert the random byte to a number between 0 and 1
     res.send(`Random number: ${randomNumber}`);
 });
 
@@ -54,3 +54,9 @@ app.use(helmet.hidePoweredBy());
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
+
+function sanitizeCommand(cmd) {
+    // This function removes shell meta characters from the command and returns the sanitized command
+    const sanitizedCmd = cmd.replace(/[;&|'`$]/g, "");
+    return sanitizedCmd;
+}
