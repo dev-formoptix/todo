@@ -43,8 +43,10 @@ app.get('/exec', (req, res) => {
 
 // Secure Random Number Generation
 app.get('/random', (req, res) => {
-    const buf = crypto.randomBytes(1); // Use a cryptographically strong pseudorandom number generator
-    const randomNumber = buf[0] / 255; // Convert the random byte to a number between 0 and 1
+    const crypto = window.crypto || window.msCrypto;
+    const array = new Uint32Array(1);
+    crypto.getRandomValues(array); // Use a cryptographically strong pseudorandom number generator
+    const randomNumber = array[0] / 4294967295; // Convert the random byte to a number between 0 and 1
     res.send(`Random number: ${randomNumber}`);
 });
 
