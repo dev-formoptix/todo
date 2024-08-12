@@ -29,13 +29,19 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
-        }
-        res.send(`Output: ${stdout}`);
-    });
+    // Fix: Use a whitelist of allowed commands instead of executing user-controlled data directly
+    const allowedCommands = ['echo', 'ls', 'pwd']; // Add more commands as needed
+    if (allowedCommands.includes(cmd)) {
+        exec(cmd, (err, stdout, stderr) => {
+            if (err) {
+                res.send(`Error: ${stderr}`);
+                return;
+            }
+            res.send(`Output: ${stdout}`);
+        });
+    } else {
+        res.send('Invalid command');
+    }
 });
 
 // Secure Random Number Generation
