@@ -36,7 +36,7 @@ app.get('/exec', (req, res) => {
     // Fix: Use a whitelist of allowed commands instead of executing user-controlled data directly
     const allowedCommands = ['echo', 'ls', 'pwd']; // Add more commands as needed
     if (allowedCommands.includes(cmd)) {
-        exec(cmd, (err, stdout, stderr) => {
+        exec(allowedCommands[cmd], (err, stdout, stderr) => {
             if (err) {
                 res.send(`Error: ${stderr}`);
                 return;
