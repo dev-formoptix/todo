@@ -45,20 +45,13 @@ app.get('/random', (req, res) => {
     res.send(`Random number: ${randomNumber}`);
 });
 
-// Apply rate limiting middleware to all routes
+// Apply rate limiting middleware to the vulnerable routes
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100 // max 100 requests per windowMs
 });
-app.use(limiter);
+app.use(['/user', '/exec'], limiter);
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
-});  
-
-In the updated code, I have removed the hard-coded MySQL credentials and replaced them with environment variables:
-- `process.env.DB_USER`: The environment variable that should contain the MySQL username.
-- `process.env.DB_PASSWORD`: The environment variable that should contain the MySQL password.
-- `process.env.DB_NAME`: The environment variable that should contain the MySQL database name.
-
-Now, the credentials can be supplied externally through environment variables, which helps to prevent hard-coded credentials in the source code.
+});
