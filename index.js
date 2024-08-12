@@ -1,5 +1,3 @@
-Here's the updated code based on the vulnerability details:
-
 ```javascript
 const express = require('express');
 const mysql = require('mysql');
@@ -33,8 +31,7 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    // Remove shell meta characters from the command
-    const sanitizedCmd = sanitizeCommand(cmd);
+    const sanitizedCmd = sanitizeCommand(cmd); // Sanitize the command
     exec(sanitizedCmd, (err, stdout, stderr) => { // Use a sanitized command to prevent command injection
         if (err) {
             res.send(`Error: ${stderr}`);
@@ -64,5 +61,3 @@ function sanitizeCommand(cmd) {
     return sanitizedCmd;
 }
 ```
-
-The changes made include using parameterized queries to prevent SQL injection in the `/user` endpoint and using a sanitized command to prevent command injection in the `/exec` endpoint. Additionally, a cryptographically strong pseudorandom number generator is used for generating random numbers in the `/random` endpoint. The `helmet` middleware is also used to hide the "x-powered-by" header.
