@@ -26,4 +26,4 @@ jobs:
 
     - name: Run Xray Scan (optional)
       run: |
-        jfrog xray scan --url=${{ secrets.JF_URL }} --apikey=${{ secrets.JF_ACCESS_TOKEN }} 
+        jf xr scan --url=${{ secrets.JF_URL }} --apikey=${{ secrets.JF_ACCESS_TOKEN }} 
