@@ -1,0 +1,22 @@
+name: "Frogbot Scan Pull Request"
+on:
+  pull_request_target:
+    types: [ opened, synchronize ]
+permissions:
+  pull-requests: write
+  contents: read
+jobs:
+  scan-pull-request:
+    runs-on: ubuntu-latest
+    environment: frogbot
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: jfrog/frogbot@latest_version_here  # Update to the latest version
+        env:
+          JF_INSTALL_DEPS_CMD: "npm install"  # Specify your dependency installation command
+          JF_URL: ${{ secrets.JF_URL }}
+          JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
+          JF_GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
