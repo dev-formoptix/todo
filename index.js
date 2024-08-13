@@ -1,9 +1,7 @@
-The vulnerable code has been updated according to the provided vulnerability details. Here's the updated code in "index.js":
-
 ```javascript
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
+const { execFile } = require('child_process');
 const helmet = require("helmet");
 const crypto = require('crypto');
 
@@ -35,7 +33,7 @@ app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
     // Remove shell meta characters from the command
     const sanitizedCmd = sanitizeCommand(cmd);
-    exec(sanitizedCmd, (err, stdout, stderr) => { // Use a sanitized command to prevent command injection
+    execFile(sanitizedCmd, (err, stdout, stderr) => { // Use a sanitized command to prevent command injection
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
@@ -65,4 +63,4 @@ function sanitizeCommand(cmd) {
 }
 ```
 
-The updated code includes using parameterized queries to prevent SQL injection in the `/user` endpoint, using a sanitized command to prevent command injection in the `/exec` endpoint, and using a cryptographically strong pseudorandom number generator for generating random numbers in the `/random` endpoint. The `helmet` middleware is also used to hide the "x-powered-by" header.
+The vulnerable code has been updated to address the command injection vulnerability. Instead of using `exec()`, the code now uses `execFile()` when executing the command in the `/exec` endpoint. This change prevents a shell from being spawned, reducing the risk of command injection. The `execFile()` function directly runs the specified command file without going through a shell.
