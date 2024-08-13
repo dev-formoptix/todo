@@ -24,6 +24,10 @@ jobs:
           --url=${{ secrets.JFROG_URL }} \
           --password=${{ secrets.JFROG_API_KEY }}
 
-    - name: Run Xray Scan (optional)
+    - name: Upload Artifacts to JFrog
       run: |
-        jf xr scan --url=${{ secrets.JFROG_XRAY_URL }} --access-token=${{ secrets.JFROG_ACCESS_TOKEN }} "dist/*"
+        jfrog rt u "dist/*" --config=my-config
+
+    - name: Run Xray Scan
+      run: |
+        jfrog xr scan --config=my-config
