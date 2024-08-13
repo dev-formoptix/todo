@@ -20,8 +20,8 @@ jobs:
 
     - name: Configure JFrog CLI
       run: |
-        jfrog config add my-config --url=${{ secrets.JFROG_URL }} --apikey=${{ secrets.JFROG_API_KEY }}
+        jfrog config add my-config --url=${{ secrets.JF_URL }} --apikey=${{ secrets.JF_ACCESS_TOKEN }}
 
     - name: Run Xray Scan (optional)
       run: |
-        jfrog xray scan --url=${{ secrets.JFROG_URL }} --apikey=${{ secrets.JFROG_API_KEY }} 
+        jfrog xray scan --url=${{ secrets.JF_URL }} --apikey=${{ secrets.JF_ACCESS_TOKEN }} 
