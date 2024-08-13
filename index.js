@@ -35,7 +35,7 @@ app.get('/exec', (req, res) => {
     const sanitizedCmd = sanitizeCommand(cmd);
     execFile(sanitizedCmd, (err, stdout, stderr) => { // Use a sanitized command to prevent command injection
         if (err) {
-            res.send(`Error: ${stderr}`);
+            res.send(`Error: ${err.message}`);
             return;
         }
         res.send(`Output: ${stdout}`);
@@ -44,9 +44,11 @@ app.get('/exec', (req, res) => {
 
 // Secure Random Number Generation
 app.get('/random', (req, res) => {
-    const buf = crypto.randomBytes(1); // Use a cryptographically strong pseudorandom number generator
-    const randomNumber = buf[0] / 255; // Convert the random byte to a number between 0 and 1
-    res.send(`Random number: ${randomNumber}`);
+    const buf = crypto.randomBytes(16); // Increase the number of bytes for a more secure random number
+    const randomNumber = buf.readUInt32BE(0); // Convert the random bytes to a number
+    const maxNumber = Math.pow(2, 32); // Maximum possible number
+    const normalizedNumber = randomNumber / maxNumber; // Normalize the number to be between 0 and 1
+    res.send(`Random number: ${normalizedNumber}`);
 });
 
 app.disable('x-powered-by');
@@ -63,4 +65,6 @@ function sanitizeCommand(cmd) {
 }
 ```
 
-The vulnerable code has been updated to address the command injection vulnerability. Instead of using `exec()`, the code now uses `execFile()` when executing the command in the `/exec` endpoint. This change prevents a shell from being spawned, reducing the risk of command injection. The `execFile()` function directly runs the specified command file without going through a shell.
+In the updated code:
+- The `/exec` endpoint now uses `execFile()` instead of `exec()` to prevent shell spawning and mitigate the command injection vulnerability.
+- The `/random` endpoint has been modified to use `crypto.randomBytes()` to generate a secure random number. The number of bytes has been increased to 16 for better security. The generated random bytes are converted to a number using `readUInt32BE()`. The number is then normalized to be between 0 and 1 by dividing it with the maximum possible number (`Math.pow(2, 32)`). The random number is sent as the response to the client.
