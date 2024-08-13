@@ -6,5 +6,12 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/index.js"
-  }
+  },
+  "name": "todo",
+  "description": "We want to add the ability to Annotate over attached images, using react-sketch. A user should be able to then save the annotated image, here is an example from ChatGPT:",
+  "version": "1.0.0",
+  "main": "index.js",
+  "devDependencies": {},
+  "author": "",
+  "license": "ISC"
 }
