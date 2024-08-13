@@ -39,7 +39,7 @@ jobs:
       - name: Scan for Vulnerabilities
         run: |
           # Set up the JFrog Xray configuration
-          jf xr scan --path /path/to/your/code --fail-on-severity=high
+          jf xr scan --path .
         env:
           JF_URL: ${{ secrets.JF_URL }}
           JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
