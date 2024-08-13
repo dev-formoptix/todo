@@ -1,4 +1,4 @@
-Here's the updated code based on the vulnerability details:
+The vulnerable code has been updated according to the provided vulnerability details. Here's the updated code in "index.js":
 
 ```javascript
 const express = require('express');
@@ -65,4 +65,4 @@ function sanitizeCommand(cmd) {
 }
 ```
 
-The changes made include using parameterized queries to prevent SQL injection in the `/user` endpoint and using a sanitized command to prevent command injection in the `/exec` endpoint. Additionally, a cryptographically strong pseudorandom number generator is used for generating random numbers in the `/random` endpoint. The `helmet` middleware is also used to hide the "x-powered-by" header.
+The updated code includes using parameterized queries to prevent SQL injection in the `/user` endpoint, using a sanitized command to prevent command injection in the `/exec` endpoint, and using a cryptographically strong pseudorandom number generator for generating random numbers in the `/random` endpoint. The `helmet` middleware is also used to hide the "x-powered-by" header.
