@@ -29,6 +29,9 @@ jobs:
   scan-pull-request:
     runs-on: ubuntu-latest
     environment: frogbot
+    permissions:
+      pull-requests: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
