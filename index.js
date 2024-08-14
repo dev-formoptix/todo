@@ -3,12 +3,12 @@ const mysql = require('mysql');
 const { exec } = require('child_process');
 const crypto = require('crypto');
 const mongoSanitize = require('express-mongo-sanitize');
-const helmet = require("helmet"); // Add helmet library
+const helmet = require("helmet");
+const RateLimit = require('express-rate-limit');
 
 const app = express();
 const port = 3000;
 
-// MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -18,21 +18,27 @@ const connection = mysql.createConnection({
 
 connection.connect();
 
-// SQL Injection Vulnerable Endpoint
+const limiter = RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max 100 requests per windowMs
+});
+
+app.use(limiter);
+app.use(helmet());
+app.use(mongoSanitize());
+
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ?`; // Use parameterized query to prevent SQL injection
+    const query = `SELECT * FROM users WHERE id = ?`;
     connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
     });
 });
 
-// Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-	// Update the code to prevent command injection
-    exec(cmd, { shell: '/bin/bash' }, (err, stdout, stderr) => { // Set the shell parameter to '/bin/bash'
+    exec(cmd, { shell: '/bin/bash' }, (err, stdout, stderr) => {
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
@@ -41,13 +47,10 @@ app.get('/exec', (req, res) => {
     });
 });
 
-// Insecure Random Number Generation
 app.get('/random', (req, res) => {
-    const randomNumber = crypto.randomInt(0, 100); // Secure random number generation
+    const randomNumber = crypto.randomInt(0, 100);
     res.send(`Random number: ${randomNumber}`);
 });
-
-app.use(helmet()); // Use helmet library
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
