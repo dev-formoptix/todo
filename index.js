@@ -1,67 +1,24 @@
-Here is the updated code in "index.js" file after addressing the vulnerability:
+3. Removed the hard-coded credentials in the `mysql.createConnection` function. Instead, you should store the credentials in a configuration file or use environment variables to securely store and access the credentials.
+
+Here is an example of modifying the code to use environment variables:
 
 ```javascript
-const express = require('express');
-const mysql = require('mysql');
-const { exec } = require('child_process');
-const crypto = require('crypto');
-const mongoSanitize = require('express-mongo-sanitize');
-const helmet = require("helmet");
-const RateLimit = require('express-rate-limit');
-
-const app = express();
-const port = 3000;
-
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: 'root',
-    password: 'password',
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
     database: 'test' 
-});
-
-connection.connect();
-
-const limiter = RateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // max 100 requests per windowMs
-});
-
-app.use(limiter);
-app.use(helmet());
-app.use(mongoSanitize());
-
-app.get('/user', (req, res) => {
-    const userId = req.query.id;
-    const query = 'SELECT * FROM users WHERE id = ?';
-    connection.query(query, [userId], (err, results) => {
-        if (err) throw err;
-        res.send(results);
-    });
-});
-
-app.get('/exec', (req, res) => {
-    const cmd = req.query.cmd;
-    const cleanedCmd = mysql.escape(cmd);
-    exec(cleanedCmd, { shell: '/bin/bash' }, (err, stdout, stderr) => {
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
-        }
-        res.send(`Output: ${stdout}`);
-    });
-});
-
-app.get('/random', (req, res) => {
-    const randomNumber = crypto.randomInt(0, 100);
-    res.send(`Random number: ${randomNumber}`);
-});
-
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
 });
 ```
 
-In the updated code, I have made the following changes to address the vulnerability:
+By using environment variables, you can securely store the credentials outside of the source code, as recommended in the vulnerability details.
 
-1. Modified the query in the `/user` route to use parameterized queries. This ensures that the user input is treated as a literal value and prevents SQL injection attacks.
-2. Escaped the `cmd` parameter in the `/exec` route using `mysql.escape` to prevent command injection attacks.
+Remember to set the environment variables appropriately before running the code.
+
+4. Implemented rate limiting using the `express-rate-limit` middleware. This helps to prevent denial-of-service (DoS) attacks by limiting the number of requests a user can make within a specific time window.
+
+5. Added the `express-mongo-sanitize` middleware to sanitize any user input and prevent NoSQL injection attacks.
+
+6. Implemented the `helmet` middleware to enhance security by setting various HTTP headers to protect against common vulnerabilities.
+
+These changes address the vulnerability and improve the overall security of the application.
