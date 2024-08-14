@@ -1,0 +1,7 @@
+version: "1"
+rules:
+  - rule: "excludeCves"
+    description: "Exclude CVEs from the alerts"
+    conditions:
+      - type: "cve"
+        exclude: true
