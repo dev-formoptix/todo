@@ -1,6 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
+const { execFile } = require('child_process');
 const crypto = require('crypto');
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
@@ -14,7 +14,7 @@ const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: 'password',
-    database: 'test' 
+    database: 'test'
 });
 
 connection.connect();
@@ -35,8 +35,8 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    const cleanCmd = cmd.replace(/[`$();&|]+/g, ''); // Clean user-provided command
-    exec(cleanCmd, (err, stdout, stderr) => { // Vulnerable to command injection
+    const args = shellQuote.parse(cmd); // Parse command into arguments array
+    execFile('wc', args, (err, stdout, stderr) => { // Execute file with arguments array
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
@@ -53,8 +53,8 @@ app.get('/random', (req, res) => {
 
 // Rate Limiting Middleware
 const limiter = RateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // max 100 requests per windowMs
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // max 100 requests per windowMs
 });
 
 app.use('/user', limiter);
