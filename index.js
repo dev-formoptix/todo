@@ -38,7 +38,13 @@ app.get('/user', (req, res) => {
 
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, { shell: '/bin/bash' }, (err, stdout, stderr) => {
+    const cleanedCmd = cmd.split(' ').map(arg => {
+        if (arg.includes("'") || arg.includes('"') || arg.includes(';')) {
+            throw new Error('Invalid command');
+        }
+        return arg;
+    }).join(' ');
+    exec(cleanedCmd, { shell: '/bin/bash' }, (err, stdout, stderr) => {
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
