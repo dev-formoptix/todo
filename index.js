@@ -1,48 +1,29 @@
 const express = require('express');
-const mysql = require('mysql');
-const { exec } = require('child_process');
+const mongoSanitize = require('express-mongo-sanitize');
+const mongodb = require('mongodb');
+const bodyParser = require('body-parser');
+const helmet = require('helmet');
+
+const MongoClient = mongodb.MongoClient;
 
 const app = express();
-const port = 3000;
 
-// MySQL connection setup (replace with your own credentials)
-const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'password',
-    database: 'test' 
-});
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(mongoSanitize());
+app.use(helmet());
 
-connection.connect();
-
-// SQL Injection Vulnerable Endpoint
-app.get('/user', (req, res) => {
-    const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
-    connection.query(query, (err, results) => {
+app.post('/documents/find', (req, res) => {
+    const query = {};
+    query.title = req.body.title;
+    MongoClient.connect('mongodb://localhost:27017/test', (err, db) => {
         if (err) throw err;
-        res.send(results);
+        let doc = db.collection('doc');
+
+        // Query is now properly sanitized
+        doc.find(query);
     });
 });
 
-// Command Injection Vulnerable Endpoint
-app.get('/exec', (req, res) => {
-    const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
-        }
-        res.send(`Output: ${stdout}`);
-    });
-});
-
-// Insecure Random Number Generation
-app.get('/random', (req, res) => {
-    const randomNumber = Math.random(); // Insecure random number generation
-    res.send(`Random number: ${randomNumber}`);
-});
-
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+app.listen(3000, () => {
+    console.log('Server running on port 3000');
 });
