@@ -5,9 +5,12 @@ const RateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const helmet = require('helmet');
 
 const app = express();
 const port = 3000;
+
+app.use(helmet());
 
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
