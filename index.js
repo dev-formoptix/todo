@@ -25,7 +25,7 @@ const limiter = RateLimit({
 
 // SQL Injection Vulnerable Endpoint
 app.get('/user', limiter, (req, res) => {
-    const userId = req.query.id;
+    const userId = sanitizeInput(req.query.id); // Sanitize user input to prevent SQL injection
     const query = 'SELECT * FROM users WHERE id = ?';
     connection.query(query, [userId], (err, results) => {
         if (err) throw err;
@@ -70,6 +70,10 @@ app.get('/:file', limiter, (req, res) => {
     }
 });
 
+function sanitizeInput(input) {
+    return input.replace(/['";]/g, ''); // Remove single quotes, double quotes, and semicolons
+}
+
 function isValidPath(path) {
     // Add validation or sanitization logic here to ensure only allowed files are served
     // Example validation: whitelist certain file extensions or check against a list of allowed paths
@@ -88,11 +92,6 @@ function isValidPath(path) {
     
     return true;
 }
-
-+ // Sanitize user input to prevent SQL injection
-+ function sanitizeInput(input) {
-+     return input.replace(/['";]/g, ''); // Remove single quotes, double quotes, and semicolons
-+ }
 
 function isValidFilePath(filePath) {
     // Perform additional checks on the file path to ensure it is secure
