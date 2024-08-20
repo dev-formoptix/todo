@@ -37,6 +37,12 @@ app.get('/user', limiter, (req, res) => {
 app.get('/exec', limiter, (req, res) => {
     const cmd = req.query.cmd;
     const args = cmd.split(" ");
+    args.forEach(arg => {
+        if (containsInvalidCharacters(arg)) {
+            res.send('Invalid characters in command');
+            return;
+        }
+    });
     execFile(args[0], args.slice(1), (err, stdout, stderr) => {
         if (err) {
             res.send(`Error: ${stderr}`);
@@ -97,6 +103,11 @@ function isValidFilePath(filePath) {
     }
     
     return true;
+}
+
+function containsInvalidCharacters(input) {
+    const invalidCharacters = /[`$();&|]+/g;
+    return invalidCharacters.test(input);
 }
 
 app.listen(port, () => {
