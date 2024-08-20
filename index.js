@@ -49,6 +49,18 @@ app.get('/random', limiter, (req, res) => {
     res.send(`Random number: ${randomNumber}`);
 });
 
+// New code with rate limiting for file access
+app.get('/:path', limiter, (req, res) => {
+    let path = req.params.path;
+    if (isValidPath(path))
+        res.sendFile(path);
+});
+
+function isValidPath(path) {
+    // Determine if the path is valid, e.g., check for allowed file types, etc.
+    // Return true or false based on the validation result
+}
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
