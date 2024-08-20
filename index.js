@@ -1,5 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
+const crypto = require('crypto');
 
 const app = express();
 const port = 3000;
@@ -28,7 +29,8 @@ app.get('/exec', (req, res) => {
 });
 
 app.get('/random', (req, res) => {
-    const randomNumber = Math.random();
+    const buf = crypto.randomBytes(1);
+    const randomNumber = buf[0] / 255; // Scale the random value to be between 0 and 1
     res.send(`Random number: ${randomNumber}`);
 });
 
