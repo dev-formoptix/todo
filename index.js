@@ -4,6 +4,7 @@ const { execFile } = require('child_process');
 const RateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 
 const app = express();
 const port = 3000;
@@ -54,7 +55,7 @@ app.get('/exec', limiter, (req, res) => {
 
 // Insecure Random Number Generation
 app.get('/random', limiter, (req, res) => {
-    const randomNumber = Math.random();
+    const randomNumber = crypto.randomInt(0, 100);
     res.send(`Random number: ${randomNumber}`);
 });
 
