@@ -3,9 +3,14 @@ const mysql = require('mysql');
 const { execFile } = require('child_process');
 const RateLimit = require('express-rate-limit');
 const path = require('path');
+const fs = require('fs');
+const crypto = require('crypto');
+const helmet = require('helmet');
 
 const app = express();
 const port = 3000;
+
+app.use(helmet());
 
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
@@ -24,7 +29,7 @@ const limiter = RateLimit({
 
 // SQL Injection Vulnerable Endpoint
 app.get('/user', limiter, (req, res) => {
-    const userId = req.query.id;
+    const userId = sanitizeInput(req.query.id); // Sanitize user input to prevent SQL injection
     const query = 'SELECT * FROM users WHERE id = ?';
     connection.query(query, [userId], (err, results) => {
         if (err) throw err;
@@ -36,6 +41,12 @@ app.get('/user', limiter, (req, res) => {
 app.get('/exec', limiter, (req, res) => {
     const cmd = req.query.cmd;
     const args = cmd.split(" ");
+    args.forEach(arg => {
+        if (containsInvalidCharacters(arg)) {
+            res.send('Invalid characters in command');
+            return;
+        }
+    });
     execFile(args[0], args.slice(1), (err, stdout, stderr) => {
         if (err) {
             res.send(`Error: ${stderr}`);
@@ -47,7 +58,7 @@ app.get('/exec', limiter, (req, res) => {
 
 // Insecure Random Number Generation
 app.get('/random', limiter, (req, res) => {
-    const randomNumber = Math.random();
+    const randomNumber = crypto.randomInt(0, 100);
     res.send(`Random number: ${randomNumber}`);
 });
 
@@ -56,11 +67,16 @@ app.get('/:file', limiter, (req, res) => {
     let file = req.params.file;
     const filePath = path.join(__dirname, 'public', file);
     if (isValidPath(file) && isValidFilePath(filePath)) {
+        filePath = fs.realpathSync(filePath); // Fix for Path Traversal vulnerability
         res.sendFile(filePath);
     } else {
         res.status(404).send('Invalid path');
     }
 });
+
+function sanitizeInput(input) {
+    return input.replace(/['";]/g, ''); // Remove single quotes, double quotes, and semicolons
+}
 
 function isValidPath(path) {
     // Add validation or sanitization logic here to ensure only allowed files are served
@@ -95,6 +111,11 @@ function isValidFilePath(filePath) {
     }
     
     return true;
+}
+
+function containsInvalidCharacters(input) {
+    const invalidCharacters = /[`$();&|]+/g;
+    return invalidCharacters.test(input);
 }
 
 app.listen(port, () => {
