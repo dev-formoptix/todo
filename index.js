@@ -89,6 +89,11 @@ function isValidPath(path) {
     return true;
 }
 
++ // Sanitize user input to prevent SQL injection
++ function sanitizeInput(input) {
++     return input.replace(/['";]/g, ''); // Remove single quotes, double quotes, and semicolons
++ }
+
 function isValidFilePath(filePath) {
     // Perform additional checks on the file path to ensure it is secure
     // Example checks: normalize the path, resolve symbolic links, check against allowed root folder
