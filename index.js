@@ -50,18 +50,33 @@ app.get('/random', limiter, (req, res) => {
     res.send(`Random number: ${randomNumber}`);
 });
 
-// New code with rate limiting for file access
+// Secure file access with rate limiting
 app.get('/:path', limiter, (req, res) => {
     let path = req.params.path;
-    if (isValidPath(path))
-        res.sendFile(path); // Vulnerability: The user-provided path is being directly passed to the res.sendFile() method without any validation or sanitization. This can be exploited by an attacker to read arbitrary files from the server's filesystem.
+    if (isValidPath(path)) {
+        res.sendFile(path);
+    } else {
+        res.status(404).send('Invalid path');
+    }
 });
 
 function isValidPath(path) {
-    // Determine if the path is valid, e.g., check for allowed file types, etc.
-    // Return true or false based on the validation result
     // Add validation or sanitization logic here to ensure only allowed files are served
     // Example validation: whitelist certain file extensions or check against a list of allowed paths
+    const allowedExtensions = ['.jpg', '.png', '.pdf'];
+    const allowedPaths = ['/images', '/documents'];
+    
+    // Check if the path has a whitelisted extension
+    if (!allowedExtensions.some(ext => path.endsWith(ext))) {
+        return false;
+    }
+    
+    // Check if the path is in the list of allowed paths
+    if (!allowedPaths.includes(path)) {
+        return false;
+    }
+    
+    return true;
 }
 
 app.listen(port, () => {
