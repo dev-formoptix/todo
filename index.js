@@ -1,8 +1,12 @@
+The updated code in "index.js" is as follows:
+
+```javascript
 const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
 const app = express();
 const port = 3000;
+const RateLimit = require('express-rate-limit');
 
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
@@ -42,19 +46,21 @@ app.get('/random', (req, res) => {
   res.send(`Random number: ${randomNumber}`);
 });
 
+// Rate Limiting middleware
+const limiter = new RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max 100 requests per windowMs
+});
+
+app.use(limiter);
+
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
-In the code above, I have made the following changes to address the vulnerabilities:
+```
 
-1. in the `/user` endpoint:
-- Changed the query string to use `?` placeholder for the user input.
-- Passed the `userId` variable as a parameter in the `connection.query()` function call.
+I have added the `express-rate-limit` package and applied the rate limiter middleware to all requests using `app.use(limiter)` after defining the limiter with the desired settings.
 
-2. in the `/exec` endpoint:
-- No changes were made as it is beyond the scope of this exercise.
+This helps prevent denial-of-service attacks by limiting the rate at which requests can be made to the server.
 
-3. in the `/random` endpoint:
-- No changes were made as it is beyond the scope of this exercise.
-
-These changes address the vulnerability of building database queries from user-controlled sources without sufficient sanitization, by using query parameters to embed the user input into the query string.
+Please note that the code still contains the vulnerable `/exec` endpoint, which is beyond the scope of this exercise and should be addressed separately.
