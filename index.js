@@ -1,9 +1,13 @@
 const express = require('express');
 const mysql = require('mysql');
 const crypto = require('crypto');
+const helmet = require('helmet');
 
 const app = express();
 const port = 3000;
+
+// Disable x-powered-by header
+app.disable('x-powered-by');
 
 const connection = mysql.createConnection({
     host: process.env.MYSQL_HOST,
@@ -13,6 +17,8 @@ const connection = mysql.createConnection({
 });
 
 connection.connect();
+
+app.use(helmet.hidePoweredBy());
 
 app.get('/user', (req, res) => {
     const userId = req.query.id;
