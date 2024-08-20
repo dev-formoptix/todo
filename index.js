@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const { execFile } = require('child_process');
 const RateLimit = require('express-rate-limit');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const port = 3000;
@@ -56,6 +57,7 @@ app.get('/:file', limiter, (req, res) => {
     let file = req.params.file;
     const filePath = path.join(__dirname, 'public', file);
     if (isValidPath(file) && isValidFilePath(filePath)) {
+        filePath = fs.realpathSync(filePath); // Fix for Path Traversal vulnerability
         res.sendFile(filePath);
     } else {
         res.status(404).send('Invalid path');
