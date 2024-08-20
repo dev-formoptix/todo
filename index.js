@@ -13,7 +13,7 @@ const connection = mysql.createConnection({
     host: process.env.MYSQL_HOST,
     user: process.env.MYSQL_USERNAME,
     password: process.env.MYSQL_PASSWORD,
-    database: process.env.MYSQL_DATABASE 
+    database: process.env.MYSQL_DATABASE
 });
 
 connection.connect();
@@ -22,8 +22,8 @@ app.use(helmet.hidePoweredBy());
 
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${connection.escape(userId)}`;
-    connection.query(query, (err, results) => {
+    const query = 'SELECT * FROM users WHERE id = ?';
+    connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
     });
