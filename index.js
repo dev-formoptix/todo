@@ -24,7 +24,7 @@ const limiter = RateLimit({
 // SQL Injection Vulnerable Endpoint
 app.get('/user', limiter, (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ?`; // Use parameterized query to prevent SQL injection
+    const query = 'SELECT * FROM users WHERE id = ?';
     connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
@@ -34,8 +34,8 @@ app.get('/user', limiter, (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', limiter, (req, res) => {
     const cmd = req.query.cmd;
-    const args = cmd.split(" "); // Split the command into an array of arguments
-    execFile(args[0], args.slice(1), (err, stdout, stderr) => { // Use execFile instead of exec to prevent command injection
+    const args = cmd.split(" ");
+    execFile(args[0], args.slice(1), (err, stdout, stderr) => {
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
@@ -46,7 +46,7 @@ app.get('/exec', limiter, (req, res) => {
 
 // Insecure Random Number Generation
 app.get('/random', limiter, (req, res) => {
-    const randomNumber = Math.random(); // Insecure random number generation
+    const randomNumber = Math.random();
     res.send(`Random number: ${randomNumber}`);
 });
 
@@ -54,12 +54,14 @@ app.get('/random', limiter, (req, res) => {
 app.get('/:path', limiter, (req, res) => {
     let path = req.params.path;
     if (isValidPath(path))
-        res.sendFile(path);
+        res.sendFile(path); // Vulnerability: The user-provided path is being directly passed to the res.sendFile() method without any validation or sanitization. This can be exploited by an attacker to read arbitrary files from the server's filesystem.
 });
 
 function isValidPath(path) {
     // Determine if the path is valid, e.g., check for allowed file types, etc.
     // Return true or false based on the validation result
+    // Add validation or sanitization logic here to ensure only allowed files are served
+    // Example validation: whitelist certain file extensions or check against a list of allowed paths
 }
 
 app.listen(port, () => {
