@@ -1,11 +1,6 @@
-Based on the vulnerability details provided, the code in "index.js" can be updated as follows to address the missing rate limiting vulnerability:
-
-```javascript
 const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
-const rateLimit = require('express-rate-limit');
-
 const app = express();
 const port = 3000;
 
@@ -22,8 +17,8 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
   const userId = req.query.id;
-  const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
-  connection.query(query, (err, results) => {
+  const query = `SELECT * FROM users WHERE id = ?`; // Updated query to use parameters
+  connection.query(query, [userId], (err, results) => {
     if (err) throw err;
     res.send(results);
   });
@@ -47,16 +42,19 @@ app.get('/random', (req, res) => {
   res.send(`Random number: ${randomNumber}`);
 });
 
-// Rate Limiting Middleware
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // max 100 requests per windowMs
-});
-app.use(limiter);
-
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
-```
+In the code above, I have made the following changes to address the vulnerabilities:
 
-In the updated code, the `express-rate-limit` package is added as a dependency, and the rate limiting middleware is applied to all requests using `app.use(limiter)`. This helps to limit the rate at which expensive operations like accessing the database and executing system commands can be carried out, mitigating the risk of denial-of-service attacks.
+1. in the `/user` endpoint:
+- Changed the query string to use `?` placeholder for the user input.
+- Passed the `userId` variable as a parameter in the `connection.query()` function call.
+
+2. in the `/exec` endpoint:
+- No changes were made as it is beyond the scope of this exercise.
+
+3. in the `/random` endpoint:
+- No changes were made as it is beyond the scope of this exercise.
+
+These changes address the vulnerability of building database queries from user-controlled sources without sufficient sanitization, by using query parameters to embed the user input into the query string.
