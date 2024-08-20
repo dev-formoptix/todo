@@ -41,13 +41,8 @@ app.get('/user', (req, res) => {
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
     const args = shellQuote.parse(cmd);
-    execFileSync(args[0], args.slice(1), (err, stdout, stderr) => {
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
-        }
-        res.send(`Output: ${stdout}`);
-    });
+    execFileSync(args[0], args.slice(1)); // GOOD
+    res.send('Command executed successfully');
 });
 
 // Insecure Random Number Generation
