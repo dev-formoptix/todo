@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql');
 const { execFile } = require('child_process');
 const RateLimit = require('express-rate-limit');
+const path = require('path');
 
 const app = express();
 const port = 3000;
@@ -51,10 +52,11 @@ app.get('/random', limiter, (req, res) => {
 });
 
 // Secure file access with rate limiting
-app.get('/:path', limiter, (req, res) => {
-    let path = req.params.path;
-    if (isValidPath(path)) {
-        res.sendFile(path);
+app.get('/:file', limiter, (req, res) => {
+    let file = req.params.file;
+    const filePath = path.join(__dirname, 'public', file);
+    if (isValidPath(file) && isValidFilePath(filePath)) {
+        res.sendFile(filePath);
     } else {
         res.status(404).send('Invalid path');
     }
@@ -73,6 +75,22 @@ function isValidPath(path) {
     
     // Check if the path is in the list of allowed paths
     if (!allowedPaths.includes(path)) {
+        return false;
+    }
+    
+    return true;
+}
+
+function isValidFilePath(filePath) {
+    // Perform additional checks on the file path to ensure it is secure
+    // Example checks: normalize the path, resolve symbolic links, check against allowed root folder
+    const ROOT = path.join(__dirname, 'public');
+
+    // Normalize the file path and resolve symbolic links
+    filePath = path.resolve(ROOT, filePath);
+    
+    // Check if the normalized path starts with the root folder
+    if (!filePath.startsWith(ROOT)) {
         return false;
     }
     
