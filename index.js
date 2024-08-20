@@ -51,6 +51,23 @@ app.get('/random', (req, res) => {
     res.send(`Random number: ${randomNumber}`);
 });
 
+// Rate limiting for expensive operations
+const expensiveOperationLimiter = RateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 10, // maximum 10 requests per hour
+});
+
+// Apply rate limiter to endpoints performing expensive operations
+app.get('/expensiveOperation1', expensiveOperationLimiter, (req, res) => {
+    // Perform expensive operation 1 here
+    res.send('Expensive operation 1 complete');
+});
+
+app.get('/expensiveOperation2', expensiveOperationLimiter, (req, res) => {
+    // Perform expensive operation 2 here
+    res.send('Expensive operation 2 complete');
+});
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
