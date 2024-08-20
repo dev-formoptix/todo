@@ -1,6 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
+const { execFile } = require('child_process');
 const RateLimit = require('express-rate-limit');
 
 const app = express();
@@ -24,8 +24,8 @@ const limiter = RateLimit({
 // SQL Injection Vulnerable Endpoint
 app.get('/user', limiter, (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
-    connection.query(query, (err, results) => {
+    const query = `SELECT * FROM users WHERE id = ?`; // Use parameterized query to prevent SQL injection
+    connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
     });
@@ -34,7 +34,8 @@ app.get('/user', limiter, (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', limiter, (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
+    const args = cmd.split(" "); // Split the command into an array of arguments
+    execFile(args[0], args.slice(1), (err, stdout, stderr) => { // Use execFile instead of exec to prevent command injection
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
