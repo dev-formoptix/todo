@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
 const base64 = require('base-64');
+const RateLimit = require('express-rate-limit');
 
 const app = express();
 const port = 3000;
@@ -15,6 +16,15 @@ const connection = mysql.createConnection({
 });
 
 connection.connect();
+
+// Rate limiter configuration
+const limiter = RateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100
+});
+
+// Apply rate limiter to all requests
+app.use(limiter);
 
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
