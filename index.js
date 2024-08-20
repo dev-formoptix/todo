@@ -1,6 +1,5 @@
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
 
 const app = express();
 const port = 3000;
@@ -25,13 +24,7 @@ app.get('/user', (req, res) => {
 
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => {
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
-        }
-        res.send(`Output: ${stdout}`);
-    });
+    res.send("Executing OS commands is disabled for security reasons.");
 });
 
 app.get('/random', (req, res) => {
