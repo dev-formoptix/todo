@@ -1,6 +1,8 @@
 const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
+const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require("helmet");
 
 const app = express();
 const port = 3000;
@@ -13,7 +15,9 @@ const connection = mysql.createConnection({
     database: 'test' 
 });
 
-connection.connect();
+const MongoClient = mongodb.MongoClient;
+
+app.use(helmet()); // Use Helmet to configure HTTP header settings
 
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
