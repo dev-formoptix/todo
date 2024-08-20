@@ -30,7 +30,6 @@ app.get('/user', (req, res) => {
 });
 
 app.get('/exec', (req, res) => {
-    const cmd = req.query.cmd;
     res.send("Executing OS commands is disabled for security reasons.");
 });
 
