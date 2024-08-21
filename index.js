@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const { exec } = require('child_process');
 const crypto = require('crypto');
 const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require("helmet");
 
 const app = express();
 const port = 3000;
@@ -16,6 +17,8 @@ const connection = mysql.createConnection({
 });
 
 connection.connect();
+
+app.use(helmet()); // Add helmet middleware for security
 
 app.use(express.json()); // Added to support JSON parsing
 app.use(express.urlencoded({ extended: true })); // Added to support URL-encoded body
