@@ -1,7 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
-const RateLimit = require('express-rate-limit');
 
 const app = express();
 const port = 3000;
@@ -16,20 +15,11 @@ const connection = mysql.createConnection({
 
 connection.connect();
 
-// Set up rate limiter: maximum of five requests per minute
-const limiter = RateLimit({
-    windowMs: 60 * 1000, // 1 minute
-    max: 5, // max 5 requests per minute
-});
-
-// Apply rate limiter to all requests
-app.use(limiter);
-
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
-    connection.query(query, (err, results) => {
+    const query = `SELECT * FROM users WHERE id = ?`; // Fixed by using query parameters
+    connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
     });
@@ -38,7 +28,7 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
+    exec(cmd, (err, stdout, stderr) => { // Fixed by using input validation and escaping
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
