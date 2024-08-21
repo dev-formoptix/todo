@@ -1,7 +1,7 @@
 const express = require('express');
 const mysql = require('mysql');
 const { execFileSync } = require('child_process');
-const RateLimit = require('express-rate-limit');
+const { rateLimit } = require('express-rate-limit');
 const shellQuote = require('shell-quote');
 
 const app = express();
@@ -18,7 +18,7 @@ const connection = mysql.createConnection({
 connection.connect();
 
 // Rate Limiting Middleware
-const limiter = RateLimit({
+const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100, // max 100 requests per windowMs
 });
