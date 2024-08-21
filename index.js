@@ -33,11 +33,11 @@ app.get('/user', limiter, (req, res) => {
 
 // Apply rate limiter to the '/exec' route
 app.get('/exec', limiter, (req, res) => {
-    const cmdId = req.query.cmdId; // Update variable name
-    const host = req.query.host; // Update variable name
+    const cmdId = parseInt(req.query.cmdId);
+    const host = req.query.host;
     const allowedCommands = [
-        { exe: "/bin/ping", args: ["-c", "1"] },
-        { exe: "/bin/host" }
+        { exe: "/bin/ping", args: ["-c", "1", "--"] },
+        { exe: "/bin/host", args: ["--"] }
     ];
     const cmd = allowedCommands[cmdId];
     const args = host ? cmd.args.concat(host) : cmd.args; // Check if host is provided
