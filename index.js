@@ -2,7 +2,6 @@ const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
 const crypto = require('crypto');
-const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require("helmet");
 
 const app = express();
@@ -57,6 +56,8 @@ app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
 
+
+const mongodb = require('mongodb');
 const mongoSanitize = require('express-mongo-sanitize');
 const MongoClient = mongodb.MongoClient;
 
@@ -65,8 +66,11 @@ app.use(mongoSanitize());
 app.post('/documents/find', (req, res) => {
     const query = {};
     query.title = req.body.title;
-    MongoClient.connect('mongodb://localhost:27017/test', (err, db) => {
-        let doc = db.collection('doc');
-        doc.find(query);
+    MongoClient.connect('mongodb://localhost:27017/test', (err, client) => {
+        let doc = client.db().collection('doc');
+        doc.find(query).toArray((err, results) => {
+            if (err) throw err;
+            res.send(results);
+        });
     });
 });
