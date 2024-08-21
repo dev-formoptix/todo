@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const { exec } = require('child_process');
 const crypto = require('crypto');
 const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require('helmet'); // Importing the helmet library
 
 const app = express();
 const port = 3000;
@@ -45,6 +46,9 @@ app.get('/random', (req, res) => {
     const randomNumber = crypto.randomInt(0, 100); // Secured random number generation
     res.send(`Random number: ${randomNumber}`);
 });
+
+// Applying helmet middleware
+app.use(helmet());
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
