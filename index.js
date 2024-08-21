@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql');
 const { spawn } = require('child_process');
 const dotenv = require('dotenv');
+const crypto = require('crypto');
 
 dotenv.config();
 
@@ -48,9 +49,11 @@ app.get('/exec', (req, res) => {
     });
 });
 
-// Insecure Random Number Generation
+// Secure Random Number Generation
 app.get('/random', (req, res) => {
-    const randomNumber = Math.random(); // Insecure random number generation
+    const array = new Uint32Array(1);
+    crypto.randomFillSync(array);
+    const randomNumber = array[0] / (Math.pow(2, 32) - 1); // Secure random number generation
     res.send(`Random number: ${randomNumber}`);
 });
 
