@@ -1,16 +1,15 @@
 const express = require('express');
 const mysql = require('mysql');
-const { execFileSync } = require('child_process');
-const RateLimit = require('express-rate-limit');
-const shellQuote = require('shell-quote');
+const { exec } = require('child_process');
+
 const app = express();
 const port = 3000;
 
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
+    user: 'root',
+    password: 'password',
     database: 'test' 
 });
 
@@ -19,8 +18,8 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ?`; // Fix vulnerability by using parameterized query
-    connection.query(query, [userId], (err, results) => {
+    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+    connection.query(query, (err, results) => {
         if (err) throw err;
         res.send(results);
     });
@@ -28,9 +27,14 @@ app.get('/user', (req, res) => {
 
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
-    const cmd = shellQuote.parse(req.query.cmd);
-    execFileSync(cmd[0], cmd.slice(1), {stdio: 'inherit'}); // Safe command execution
-    res.send('Command Executed Successfully');
+    const cmd = req.query.cmd;
+    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
+        if (err) {
+            res.send(`Error: ${stderr}`);
+            return;
+        }
+        res.send(`Output: ${stdout}`);
+    });
 });
 
 // Insecure Random Number Generation
@@ -39,27 +43,6 @@ app.get('/random', (req, res) => {
     res.send(`Random number: ${randomNumber}`);
 });
 
-// Rate limiter: maximum of 100 requests per 15 minutes
-const limiter = RateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
-});
-
-// Apply rate limiter to all requests except the ones that access the file system
-app.use(limiter);
-
-app.get('/:path', (req, res) => {
-    let path = req.params.path;
-    if (isValidPath(path)) {
-        res.sendFile(path);
-    }
-});
-
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
-
-function isValidPath(path) {
-    // Implement your logic to validate the path here
-    return true;
-}
