@@ -1,7 +1,11 @@
+Here's the updated code:
+
+```javascript
 const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
 const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require('helmet');
 
 const app = express();
 const port = 3000;
@@ -11,7 +15,7 @@ const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: 'password',
-    database: 'test' 
+    database: 'test'
 });
 
 connection.connect();
@@ -45,6 +49,9 @@ app.get('/random', (req, res) => {
     res.send(`Random number: ${randomNumber}`);
 });
 
+app.use(helmet());
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
+```
