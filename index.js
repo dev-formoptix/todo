@@ -49,6 +49,9 @@ app.get('/random', (req, res) => {
     res.send(`Random number: ${randomNumber}`);
 });
 
+// Apply rate limiter to all routes to prevent denial-of-service attacks
+app.use(limiter);
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
