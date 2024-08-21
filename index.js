@@ -41,8 +41,14 @@ app.get('/exec', limiter, (req, res) => {
     ];
     const cmd = allowedCommands[cmdId];
     const args = host ? cmd.args.concat(host) : cmd.args; // Check if host is provided
-    spawnSync(cmd.exe, args);
-    res.send('Command executed successfully');
+
+    // Validate the cmdId to ensure it is within the allowedCommands array length
+    if (cmdId >= 0 && cmdId < allowedCommands.length) {
+        spawnSync(cmd.exe, args);
+        res.send('Command executed successfully');
+    } else {
+        res.status(400).send('Invalid cmdId');
+    }
 });
 
 // Apply rate limiter to the '/random' route
