@@ -1,10 +1,11 @@
-Here is the updated code to address the missing rate limiting vulnerability:
+Here is the updated code to address the database query vulnerability:
 
 ```javascript
 const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
 const rateLimit = require('express-rate-limit');
+const SqlString = require('sqlstring');
 
 const app = express();
 const port = 3000;
@@ -19,10 +20,10 @@ const connection = mysql.createConnection({
 
 connection.connect();
 
-// SQL Injection Vulnerable Endpoint
+// SQL Injection Protected Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+    const query = `SELECT * FROM users WHERE id = ${SqlString.escape(userId)}`; // Protected against SQL injection
     connection.query(query, (err, results) => {
         if (err) throw err;
         res.send(results);
@@ -62,12 +63,10 @@ app.listen(port, () => {
 
 In the updated code:
 
-- We added the `express-rate-limit` package to handle rate limiting.
+- We added the `sqlstring` package to safely escape user input in SQL queries.
 
-- At the top of the file, the `rateLimit` middleware is imported.
+- At the top of the file, the `SqlString` module is imported.
 
-- The rate limiting middleware is configured with a window of 15 minutes and a maximum of 100 requests per window.
+- In the `/user` route, the `userId` is escaped using `SqlString.escape()` before being included in the SQL query. This protects against SQL injection attacks.
 
-- The middleware is then applied to all routes using `app.use(limiter)`.
-
-Now, the server will only accept a maximum of 100 requests per 15 minutes, preventing denial-of-service attacks caused by issuing a large number of requests at the same time.
+Now, the SQL query is built using user input that has been properly escaped, making it safe from SQL injection attacks.
