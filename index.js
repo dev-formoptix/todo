@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const { exec } = require('child_process');
 const crypto = require('crypto');
 const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require('helmet'); // Import helmet library
 
 const app = express();
 const port = 3000;
@@ -17,6 +18,7 @@ const connection = mysql.createConnection({
 
 connection.connect();
 
+app.use(helmet()); // Use helmet middleware
 app.use(mongoSanitize()); // Add mongoSanitize middleware
 
 // SQL Injection Vulnerable Endpoint
