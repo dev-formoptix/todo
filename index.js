@@ -33,9 +33,11 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    const cmdArray = cmd.split(" "); // Split the command by space
-    
-    const childProcess = spawn(cmdArray[0], cmdArray.slice(1), { shell: false }); // Execute the command as an array of arguments
+    //const cmdArray = cmd.split(" "); // Split the command by space
+    //const childProcess = spawn(cmdArray[0], cmdArray.slice(1), { shell: false }); // Execute the command as an array of arguments
+
+    // Updated code to not construct the OS command from user-controlled data
+    const childProcess = spawn(cmd, [], { shell: true }); // Execute the command as a string
     childProcess.on('close', (code) => {
         console.log(`Command exited with code ${code}`);
         res.send('Command executed');
