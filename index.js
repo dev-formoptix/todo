@@ -1,7 +1,8 @@
 const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
-const crypto = require('crypto'); // Added crypto module
+const crypto = require('crypto');
+const mongoSanitize = require('express-mongo-sanitize');
 
 const app = express();
 const port = 3000;
@@ -15,6 +16,9 @@ const connection = mysql.createConnection({
 });
 
 connection.connect();
+
+app.use(express.json()); // Added to support JSON parsing
+app.use(express.urlencoded({ extended: true })); // Added to support URL-encoded body
 
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
