@@ -31,7 +31,7 @@ app.get('/user', (req, res) => {
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
     const cleanedCmd = cmd.replace(/[`$();&|]+/g, '');
-    exec(cleanedCmd, (err, stdout, stderr) => {
+    exec(cleanedCmd, { shell: '/bin/bash' }, (err, stdout, stderr) => {
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
