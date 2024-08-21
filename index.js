@@ -36,7 +36,9 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(`ls ${cmd}`, (err, stdout, stderr) => { // Execute a fixed command (ls) with the user-provided argument
+    // Prevent command injection by sanitizing the user input
+    const sanitizedCmd = cmd.replace(/[`$();&|]+/g, ''); 
+    exec(`ls ${sanitizedCmd}`, (err, stdout, stderr) => { // Execute a fixed command (ls) with the user-provided argument
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
@@ -53,4 +55,18 @@ app.get('/random', (req, res) => {
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
+});
+
+const mongoSanitize = require('express-mongo-sanitize');
+const MongoClient = mongodb.MongoClient;
+
+app.use(mongoSanitize());
+
+app.post('/documents/find', (req, res) => {
+    const query = {};
+    query.title = req.body.title;
+    MongoClient.connect('mongodb://localhost:27017/test', (err, db) => {
+        let doc = db.collection('doc');
+        doc.find(query);
+    });
 });
