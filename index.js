@@ -3,11 +3,15 @@ const mysql = require('mysql');
 const { spawn } = require('child_process');
 const dotenv = require('dotenv');
 const crypto = require('crypto');
+const helmet = require('helmet');
 
 dotenv.config();
 
 const app = express();
 const port = 3000;
+
+// Disable x-powered-by header
+app.disable('x-powered-by');
 
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
