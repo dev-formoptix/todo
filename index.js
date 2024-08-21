@@ -3,7 +3,6 @@ const mysql = require('mysql');
 const { execFileSync } = require('child_process');
 const RateLimit = require('express-rate-limit');
 const shellQuote = require('shell-quote');
-
 const app = express();
 const port = 3000;
 
@@ -20,8 +19,8 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
-    connection.query(query, (err, results) => {
+    const query = `SELECT * FROM users WHERE id = ?`; // Fix vulnerability by using parameterized query
+    connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
     });
