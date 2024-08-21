@@ -12,14 +12,14 @@ const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: 'password',
-    database: 'test' 
+    database: 'test'
 });
 connection.connect();
 
 // Create a rate limiter middleware
 const limiter = RateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // max 100 requests per windowMs
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // max 100 requests per windowMs
 });
 
 // Apply rate limiter to the '/user' route
@@ -35,8 +35,8 @@ app.get('/user', limiter, (req, res) => {
 // Apply rate limiter to the '/exec' route
 app.get('/exec', limiter, (req, res) => {
     const cmd = req.query.cmd;
-    const safeCmd = shellQuote.parse(cmd); 
-    execFileSync(safeCmd[0], safeCmd.slice(1), (err, stdout, stderr) => { 
+    const safeCmd = shellQuote.parse(cmd);
+    execFileSync(safeCmd[0], safeCmd.slice(1), (err, stdout, stderr) => {
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
@@ -50,6 +50,8 @@ app.get('/random', limiter, (req, res) => {
     const randomNumber = crypto.randomInt(0, 100);
     res.send(`Random number: ${randomNumber}`);
 });
+
+app.use(mongoSanitize()); // Add this line to sanitize user input
 
 app.use(helmet());
 
