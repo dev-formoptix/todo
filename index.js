@@ -35,8 +35,10 @@ app.get('/user', limiter, (req, res) => {
 // Apply rate limiter to the '/exec' route
 app.get('/exec', limiter, (req, res) => {
     const cmd = req.query.cmd;
+    // Validate and sanitize the input to prevent command injection
     const safeCmd = shellQuote.parse(cmd);
-    execFileSync(safeCmd[0], safeCmd.slice(1), (err, stdout, stderr) => {
+    const sanitizedCmd = safeCmd.map(arg => arg.replace(/[`$();&|]+/g, ''));
+    execFileSync(sanitizedCmd[0], sanitizedCmd.slice(1), (err, stdout, stderr) => {
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
