@@ -29,8 +29,17 @@ app.get('/user', (req, res) => {
 
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
+    // Check if cmd parameter is provided
+    if (!req.query.cmd) {
+        res.status(400).send('Missing cmd parameter');
+        return;
+    }
+  
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
+    // Split the cmd into an array of arguments
+    const cmdArgs = cmd.split(' ');
+  
+    exec(cmdArgs, (err, stdout, stderr) => { // Vulnerable to command injection
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
@@ -56,12 +65,3 @@ app.use(limiter);
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
-```
-
-In the updated code:
-
-- We removed the hard-coded credentials for the MySQL connection.
-
-- Instead, we are now using the `process.env` object to retrieve the database user and password from environment variables `DB_USER` and `DB_PASSWORD`.
-
-By using environment variables, the credentials are no longer hard-coded in the source code and can be set externally. This enhances security by preventing accidental exposure of the credentials in the source code.
