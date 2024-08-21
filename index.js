@@ -54,6 +54,28 @@ app.get('/random', (req, res) => {
     res.send(`Random number: ${randomNumber}`);
 });
 
+app.get("/search", function handler(req, res) {
+  // GOOD: use parameters
+  var query =
+    "SELECT ITEM,PRICE FROM PRODUCT WHERE ITEM_CATEGORY = ? ORDER BY PRICE";
+  connection.query(query, [req.query.category], function(err, results) {
+    // process results
+    if (err) throw err;
+    res.send(results);
+  });
+});
+
+app.delete("/api/delete", async (req, res) => {
+  let id = req.body.id;
+  if (typeof id !== "string") {
+    res.status(400).json({ status: "error" });
+    return;
+  }
+  await Todo.deleteOne({ _id: id }); // GOOD: id is guaranteed to be a string
+
+  res.json({ status: "ok" });
+});
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
