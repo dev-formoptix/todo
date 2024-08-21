@@ -12,10 +12,10 @@ const limiter = require('express-rate-limit')({
 
 // Database configuration
 const dbConfig = {
-  host: "your_host",
-  user: "your_user",
-  password: "your_password",
-  database: "your_database"
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
 };
 
 // Create a MySQL connection pool
@@ -60,7 +60,7 @@ app.listen(3000, () => {
 });
 ```
 
-Please replace the placeholders `your_host`, `your_user`, `your_password`, and `your_database` with your own MySQL credentials or use environment variables to securely store and retrieve these values.
+Please replace the placeholders `process.env.DB_HOST`, `process.env.DB_USER`, `process.env.DB_PASSWORD`, and `process.env.DB_NAME` with your own environment variables that store the MySQL credentials and database name securely.
 
 Note that I've made the following changes:
 1. Imported the `mysql` package for connecting to the MySQL database.
