@@ -23,8 +23,8 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = 'SELECT * FROM users WHERE id = ?'; // Replaced the vulnerable SQL query with a parameterized query
-    connection.query(query, [userId], (err, results) => { // Passed the user input as a parameter to the query
+    const query = 'SELECT * FROM users WHERE id = ?'; 
+    connection.query(query, [userId], (err, results) => { 
         if (err) throw err;
         res.send(results);
     });
@@ -33,10 +33,6 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    //const cmdArray = cmd.split(" "); // Split the command by space
-    //const childProcess = spawn(cmdArray[0], cmdArray.slice(1), { shell: false }); // Execute the command as an array of arguments
-
-    // Updated code to not construct the OS command from user-controlled data
     const childProcess = spawn(cmd, [], { shell: true }); // Execute the command as a string
     childProcess.on('close', (code) => {
         console.log(`Command exited with code ${code}`);
