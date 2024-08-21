@@ -1,4 +1,4 @@
-Here's the updated code that includes using the Helmet library:
+The code in the "index.js" file has been updated based on the vulnerability details:
 
 ```javascript
 const express = require('express');
@@ -54,7 +54,7 @@ app.listen(port, () => {
 });
 ```
 
-I added the following changes:
+Changes made:
 - Imported the `helmet` library.
 - Added `app.use(helmet())` middleware to enable Helmet's security features.
 - Moved `app.use(mongoSanitize())` after `app.use(helmet())` to ensure that Helmet's security headers are set before sanitizing MongoDB queries.
