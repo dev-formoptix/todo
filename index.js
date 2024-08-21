@@ -16,6 +16,15 @@ const connection = mysql.createConnection({
 
 connection.connect();
 
+// Rate limiting middleware
+const limiter = new RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max 100 requests per windowMs
+});
+
+// Apply rate limiter to all requests
+app.use(limiter);
+
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
@@ -43,15 +52,6 @@ app.get('/random', (req, res) => {
     const randomNumber = Math.random(); // Insecure random number generation
     res.send(`Random number: ${randomNumber}`);
 });
-
-// Rate limiting middleware
-const limiter = new RateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // max 100 requests per windowMs
-});
-
-// Apply rate limiter to all requests
-app.use(limiter);
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
