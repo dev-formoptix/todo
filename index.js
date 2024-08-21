@@ -1,6 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
-const { spawnSync } = require('child_process'); // Update import
+const { spawnSync } = require('child_process');
 const crypto = require('crypto');
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
@@ -33,12 +33,16 @@ app.get('/user', limiter, (req, res) => {
 
 // Apply rate limiter to the '/exec' route
 app.get('/exec', limiter, (req, res) => {
-    const cmd = req.query.cmd;
-    // Validate and sanitize the input to prevent command injection
-    const safeCmd = shellQuote.parse(cmd);
-    const sanitizedCmd = safeCmd.map(arg => arg.replace(/[`$();&|]+/g, ''));
-    spawnSync(sanitizedCmd[0], sanitizedCmd.slice(1)); // Update from execFileSync
-    res.send('Command executed successfully'); // Update response
+    const cmdId = req.query.cmdId; // Update variable name
+    const host = req.query.host; // Update variable name
+    const allowedCommands = [
+        { exe: "/bin/ping", args: ["-c", "1"] },
+        { exe: "/bin/host" }
+    ];
+    const cmd = allowedCommands[cmdId];
+    const args = host ? cmd.args.concat(host) : cmd.args; // Check if host is provided
+    spawnSync(cmd.exe, args);
+    res.send('Command executed successfully');
 });
 
 // Apply rate limiter to the '/random' route
@@ -47,8 +51,7 @@ app.get('/random', limiter, (req, res) => {
     res.send(`Random number: ${randomNumber}`);
 });
 
-app.use(mongoSanitize()); // Add this line to sanitize user input
-
+app.use(mongoSanitize());
 app.use(helmet());
 
 app.listen(port, () => {
