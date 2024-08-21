@@ -1,6 +1,7 @@
 const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
+const RateLimit = require('express-rate-limit');
 
 const app = express();
 const port = 3000;
@@ -14,6 +15,15 @@ const connection = mysql.createConnection({
 });
 
 connection.connect();
+
+// Set up rate limiter: maximum of five requests per minute
+const limiter = RateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 5, // max 5 requests per windowMs
+});
+
+// Apply rate limiter to all requests
+app.use(limiter);
 
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
