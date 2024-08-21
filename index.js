@@ -1,6 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
-const { spawnSync } = require('child_process');
+const { spawn } = require('child_process');
 const crypto = require('crypto');
 const helmet = require("helmet");
 
@@ -33,8 +33,13 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    spawnSync(cmd, { shell: false }); // Compliant
-    res.send('Command executed');
+    const cmdArray = cmd.split(" "); // Split the command by space
+    
+    const childProcess = spawn(cmdArray[0], cmdArray.slice(1), { shell: false }); // Execute the command as an array of arguments
+    childProcess.on('close', (code) => {
+        console.log(`Command exited with code ${code}`);
+        res.send('Command executed');
+    });
 });
 
 // Secure Random Number Generation
