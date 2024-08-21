@@ -3,7 +3,7 @@ const mysql = require('mysql');
 const { exec } = require('child_process');
 const crypto = require('crypto');
 const mongoSanitize = require('express-mongo-sanitize');
-const helmet = require('helmet'); // Importing the helmet library
+const helmet = require('helmet');
 const RateLimit = require('express-rate-limit');
 
 const app = express();
@@ -22,8 +22,8 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ?`; // Using parameterized query
-    connection.query(query, [userId], (err, results) => {  // Passing the userId as a parameter
+    const query = `SELECT * FROM users WHERE id = ?`; 
+    connection.query(query, [userId], (err, results) => {  
         if (err) throw err;
         res.send(results);
     });
@@ -32,8 +32,8 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    const safeCmd = cmd.replace(/[`$();&|]+/g, ''); // Cleaning the user-provided input
-    exec(safeCmd, (err, stdout, stderr) => { // Executing the safe command
+    const safeCmd = cmd.replace(/[`$();&|]+/g, ''); 
+    exec(safeCmd, (err, stdout, stderr) => { 
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
@@ -44,20 +44,30 @@ app.get('/exec', (req, res) => {
 
 // Insecure Random Number Generation
 app.get('/random', (req, res) => {
-    const randomNumber = crypto.randomInt(0, 100); // Secured random number generation
+    const randomNumber = crypto.randomInt(0, 100); 
     res.send(`Random number: ${randomNumber}`);
 });
 
 // Applying helmet middleware
 app.use(helmet());
 
-// Applying rate limiting middleware
+// Adding rate limiting middleware
 const limiter = RateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // max 100 requests per windowMs
+  windowMs: 15 * 60 * 1000, 
+  max: 100,
 });
 
-app.use(limiter);
+app.use((req, res, next) => {
+  if (
+    req.originalUrl === '/user' ||
+    req.originalUrl === '/exec' ||
+    req.originalUrl === '/random'
+  ) {
+    limiter(req, res, next);
+  } else {
+    next();
+  }
+});
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
