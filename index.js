@@ -56,3 +56,17 @@ app.get('/random', (req, res) => {
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
+
+const mongoSanitize = require('express-mongo-sanitize');
+const MongoClient = mongodb.MongoClient;
+
+app.use(mongoSanitize());
+
+app.post('/documents/find', (req, res) => {
+    const query = {};
+    query.title = req.body.title;
+    MongoClient.connect('mongodb://localhost:27017/test', (err, db) => {
+        let doc = db.collection('doc');
+        doc.find(query);
+    });
+});
