@@ -52,6 +52,12 @@ const limiter = RateLimit({
 
 app.use(limiter); // Apply rate limiter to all requests
 
+app.get('/:path', function(req, res) {
+  let path = req.params.path;
+  if (isValidPath(path)) // Assuming there is a function called isValidPath that validates the path
+    res.sendFile(path);
+});
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
