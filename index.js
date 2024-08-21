@@ -1,6 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
+const { spawn } = require('child_process');
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -31,12 +31,20 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
-        }
-        res.send(`Output: ${stdout}`);
+    const args = cmd.split(' ');
+    const spawnedProcess = spawn(args[0], args.slice(1)); // Use spawn instead of exec to prevent command injection
+    let output = '';
+
+    spawnedProcess.stdout.on('data', (data) => {
+        output += data.toString();
+    });
+
+    spawnedProcess.stderr.on('data', (data) => {
+        output += `Error: ${data.toString()}`;
+    });
+
+    spawnedProcess.on('close', (code) => {
+        res.send(`Output: ${output}`);
     });
 });
 
