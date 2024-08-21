@@ -1,8 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
-const { execFileSync } = require('child_process');
-const { rateLimit } = require('express-rate-limit');
-const shellQuote = require('shell-quote');
+const { exec } = require('child_process');
 
 const app = express();
 const port = 3000;
@@ -10,27 +8,18 @@ const port = 3000;
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: process.env.MYSQL_USER || 'root',
-    password: process.env.MYSQL_PASSWORD || 'password',
-    database: 'test'
+    user: 'root',
+    password: 'password',
+    database: 'test' 
 });
 
 connection.connect();
 
-// Rate Limiting Middleware
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // max 100 requests per windowMs
-});
-
-// Apply rate limiter middleware to all requests
-app.use(limiter);
-
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = 'SELECT * FROM users WHERE id = ?'; // use query parameters
-    connection.query(query, [userId], (err, results) => {
+    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+    connection.query(query, (err, results) => {
         if (err) throw err;
         res.send(results);
     });
@@ -39,7 +28,7 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    execFileSync('wc', shellQuote.parse(cmd), (err, stdout, stderr) => { // Good, using execFileSync and shellQuote.parse to prevent command injection
+    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
