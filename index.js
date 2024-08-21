@@ -1,5 +1,3 @@
-The code in the "index.js" file has been updated based on the vulnerability details:
-
 ```javascript
 const express = require('express');
 const mysql = require('mysql');
@@ -53,10 +51,4 @@ app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
 ```
-
-Changes made:
-- Imported the `helmet` library.
-- Added `app.use(helmet())` middleware to enable Helmet's security features.
-- Moved `app.use(mongoSanitize())` after `app.use(helmet())` to ensure that Helmet's security headers are set before sanitizing MongoDB queries.
-- Removed the duplicated "Help" information and "Language" field, as they seemed to be mistakenly included in the instructions.
-- Formatted the code for better readability.
+By adding the `app.use(helmet())` middleware, Helmet will be used to configure the necessary HTTP headers for better security.
