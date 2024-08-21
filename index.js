@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const { exec } = require('child_process');
 const crypto = require('crypto');
 const helmet = require("helmet");
+const mongoSanitize = require('express-mongo-sanitize');
 
 const app = express();
 const port = 3000;
@@ -58,7 +59,6 @@ app.listen(port, () => {
 
 
 const mongodb = require('mongodb');
-const mongoSanitize = require('express-mongo-sanitize');
 const MongoClient = mongodb.MongoClient;
 
 app.use(mongoSanitize());
