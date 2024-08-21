@@ -1,6 +1,3 @@
-Here is the updated code to address the database query vulnerability:
-
-```javascript
 const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
@@ -13,8 +10,8 @@ const port = 3000;
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: 'root',
-    password: 'password',
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
     database: 'test' 
 });
 
@@ -63,10 +60,8 @@ app.listen(port, () => {
 
 In the updated code:
 
-- We added the `sqlstring` package to safely escape user input in SQL queries.
+- We removed the hard-coded credentials for the MySQL connection.
 
-- At the top of the file, the `SqlString` module is imported.
+- Instead, we are now using the `process.env` object to retrieve the database user and password from environment variables `DB_USER` and `DB_PASSWORD`.
 
-- In the `/user` route, the `userId` is escaped using `SqlString.escape()` before being included in the SQL query. This protects against SQL injection attacks.
-
-Now, the SQL query is built using user input that has been properly escaped, making it safe from SQL injection attacks.
+By using environment variables, the credentials are no longer hard-coded in the source code and can be set externally. This enhances security by preventing accidental exposure of the credentials in the source code.
