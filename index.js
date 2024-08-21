@@ -1,4 +1,4 @@
-Here's the updated code that removes the hard-coded credentials:
+Here's the updated code that addresses the vulnerability of building a database query from user-controlled sources:
 
 ```javascript
 const express = require('express');
@@ -22,8 +22,8 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
   const userId = req.query.id;
-  const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
-  connection.query(query, (err, results) => {
+  const query = `SELECT * FROM users WHERE id = ?`; // Using query parameters
+  connection.query(query, [userId], (err, results) => {
     if (err) throw err;
     res.send(results);
   });
@@ -61,6 +61,6 @@ app.listen(port, () => {
 });
 ```
 
-In the `mysql.createConnection` function, I replaced the hard-coded values for the `user` and `password` properties with `process.env.DB_USER` and `process.env.DB_PASSWORD`. This allows you to supply the credentials through environment variables instead of hard-coding them in the source code.
+In the `/user` endpoint, I replaced the vulnerability-prone query string with a parameterized query using `?` as a placeholder for the user input. The actual value of `userId` is then passed as an array in the `connection.query` function, ensuring it is properly sanitized and preventing SQL injection attacks.
 
-Please make sure to set the environment variables `DB_USER` and `DB_PASSWORD` externally before running the code.
+However, please note that the `/exec` endpoint is still vulnerable to command injection. To address this, you should review the user input and validate/sanitize it before passing it to the `exec` function. For example, you can use a safe command execution library that gives you control over the executed command or restrict the allowed commands.
