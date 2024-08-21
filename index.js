@@ -4,6 +4,7 @@ const { exec } = require('child_process');
 const crypto = require('crypto');
 const app = express();
 const port = 3000;
+const mongoSanitize = require('express-mongo-sanitize');
 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -14,9 +15,12 @@ const connection = mysql.createConnection({
 
 connection.connect();
 
+app.use(mongoSanitize());
+
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`;
+    const cleanUserId = userId.replace(/[`$();&|]+/g, ''); // Clean user-provided input
+    const query = `SELECT * FROM users WHERE id = ${cleanUserId}`;
     connection.query(query, (err, results) => {
         if (err) throw err;
         res.send(results);
