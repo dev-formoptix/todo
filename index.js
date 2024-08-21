@@ -15,7 +15,15 @@ const connection = mysql.createConnection({
     database: 'test' 
 });
 connection.connect();
-app.get('/user', (req, res) => {
+
+// Create a rate limiter middleware
+const limiter = RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max 100 requests per windowMs
+});
+
+// Apply rate limiter to the '/user' route
+app.get('/user', limiter, (req, res) => {
     const userId = req.query.id;
     const query = `SELECT * FROM users WHERE id = ?`;
     connection.query(query, [userId], (err, results) => {
@@ -23,7 +31,9 @@ app.get('/user', (req, res) => {
         res.send(results);
     });
 });
-app.get('/exec', (req, res) => {
+
+// Apply rate limiter to the '/exec' route
+app.get('/exec', limiter, (req, res) => {
     const cmd = req.query.cmd;
     const safeCmd = shellQuote.parse(cmd); 
     execFileSync(safeCmd[0], safeCmd.slice(1), (err, stdout, stderr) => { 
@@ -34,27 +44,14 @@ app.get('/exec', (req, res) => {
         res.send(`Output: ${stdout}`);
     });
 });
-app.get('/random', (req, res) => {
+
+// Apply rate limiter to the '/random' route
+app.get('/random', limiter, (req, res) => {
     const randomNumber = crypto.randomInt(0, 100);
     res.send(`Random number: ${randomNumber}`);
 });
 
 app.use(helmet());
-const limiter = RateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-});
-app.use((req, res, next) => {
-  if (
-    req.originalUrl === '/user' ||
-    req.originalUrl === '/exec' ||
-    req.originalUrl === '/random'
-  ) {
-    limiter(req, res, next);
-  } else {
-    next();
-  }
-});
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
