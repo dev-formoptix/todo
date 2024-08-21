@@ -1,3 +1,5 @@
+Here is the updated code that addresses the hard-coded credentials vulnerability:
+
 const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
@@ -7,11 +9,11 @@ const SqlString = require('sqlstring');
 const app = express();
 const port = 3000;
 
-// MySQL connection setup (replace with your own credentials)
+// MySQL connection setup (replace with your own credentials or use environment variables)
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: 'root',
-    password: 'password',
+    user: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
     database: 'test' 
 });
 
@@ -57,3 +59,7 @@ app.get('/random', (req, res) => {
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
+
+In the updated code:
+1. The hard-coded credentials for the MySQL connection are replaced with environment variables `DB_USERNAME` and `DB_PASSWORD`.
+2. The environment variables should be set externally without hard-coding credentials in the source code.
