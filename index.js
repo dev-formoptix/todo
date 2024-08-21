@@ -1,4 +1,4 @@
-Here's the updated code that removes the hard-coded credentials:
+Here's the updated code that adds rate limiting to the vulnerable endpoints:
 
 ```javascript
 const express = require('express');
@@ -20,7 +20,7 @@ const connection = mysql.createConnection({
 connection.connect();
 
 // SQL Injection Vulnerable Endpoint
-app.get('/user', (req, res) => {
+app.get('/user', limiter, (req, res) => {
   const userId = req.query.id;
   const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
   connection.query(query, (err, results) => {
@@ -30,7 +30,7 @@ app.get('/user', (req, res) => {
 });
 
 // Command Injection Vulnerable Endpoint
-app.get('/exec', (req, res) => {
+app.get('/exec', limiter, (req, res) => {
   const cmd = req.query.cmd;
   exec(cmd, (err, stdout, stderr) => {
     // Vulnerable to command injection
@@ -43,7 +43,7 @@ app.get('/exec', (req, res) => {
 });
 
 // Insecure Random Number Generation
-app.get('/random', (req, res) => {
+app.get('/random', limiter, (req, res) => {
   const randomNumber = Math.random(); // Insecure random number generation
   res.send(`Random number: ${randomNumber}`);
 });
@@ -61,6 +61,4 @@ app.listen(port, () => {
 });
 ```
 
-In the `mysql.createConnection` function, I replaced the hard-coded values for the `user` and `password` properties with `process.env.DB_USER` and `process.env.DB_PASSWORD`. This allows you to supply the credentials through environment variables instead of hard-coding them in the source code.
-
-Please make sure to set the environment variables `DB_USER` and `DB_PASSWORD` externally before running the code.
+In this updated code, I added the `limiter` middleware to the routes `/user`, `/exec`, and `/random`. This middleware ensures that the requests to these vulnerable endpoints are rate-limited according to the specified configuration.
