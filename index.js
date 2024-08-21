@@ -1,6 +1,9 @@
 const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
+const crypto = require('crypto');
+const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require("helmet");
 
 const app = express();
 const port = 3000;
@@ -15,11 +18,16 @@ const connection = mysql.createConnection({
 
 connection.connect();
 
+app.use(helmet()); // Add helmet middleware for security
+
+app.use(express.json()); // Added to support JSON parsing
+app.use(express.urlencoded({ extended: true })); // Added to support URL-encoded body
+
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
-    connection.query(query, (err, results) => {
+    const query = `SELECT * FROM users WHERE id = ?`; // Use parameterized query to prevent SQL injection
+    connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
     });
@@ -28,7 +36,7 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
+    exec(`ls ${cmd}`, (err, stdout, stderr) => { // Execute a fixed command (ls) with the user-provided argument
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
@@ -39,7 +47,7 @@ app.get('/exec', (req, res) => {
 
 // Insecure Random Number Generation
 app.get('/random', (req, res) => {
-    const randomNumber = Math.random(); // Insecure random number generation
+    const randomNumber = crypto.randomInt(0, 100); // Secure random number generation
     res.send(`Random number: ${randomNumber}`);
 });
 
