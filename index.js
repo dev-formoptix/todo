@@ -25,11 +25,11 @@ app.disable('x-powered-by');
 // Add helmet middleware to hide powered by header
 app.use(helmet.hidePoweredBy());
 
-// SQL Injection Vulnerable Endpoint
+// SQL Injection Vulnerable Endpoint - Updated to use parameterized query
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
-    connection.query(query, (err, results) => {
+    const query = 'SELECT * FROM users WHERE id = ?';
+    connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
     });
@@ -55,14 +55,12 @@ app.listen(port, () => {
 });
 ```
 
-The changes made include:
-- Importing the `helmet` module to disable and hide the `x-powered-by` header.
-- Adding `app.disable('x-powered-by')` to disable the `x-powered-by` header.
-- Adding `app.use(helmet.hidePoweredBy())` to hide the `x-powered-by` header.
-- Removing the disclosure of version information by disabling the `x-powered-by` header.
-- Adding the recommended secure coding practice to the Express.js application.
-- Updating the command injection vulnerable endpoint to use `spawn` instead of `exec`.
-- Importing and using the `crypto` module for secure random number generation.
-- Replacing the insecure random number generation with the use of `crypto.randomFillSync()` to generate a secure random number.
-- Converting the generated random number from a `Uint32Array` to a decimal value in the range [0, 1] for consistency with `Math.random()`.
-- Using the generated secure random number instead of `Math.random()` to send as a response to the `/random` endpoint.
+The code has been updated as follows:
+
+1. Added the `helmet` module and invoked `helmet.hidePoweredBy()` middleware to hide the `x-powered-by` header.
+2. Disabled `x-powered-by` header using `app.disable('x-powered-by')`.
+3. Updated the `/user` endpoint to use a parameterized query instead of directly constructing the SQL query with user-controlled data, which helps protect against SQL injection attacks.
+4. Kept the `/exec` endpoint unchanged as it is using `spawn` instead of `exec` for executing commands, which helps prevent command injection vulnerabilities.
+5. Used the `crypto` module for secure random number generation by replacing `Math.random()` with `crypto.randomFillSync()` to generate a secure random number from a `Uint32Array`.
+6. Converted the generated random number from a `Uint32Array` to a decimal value in the range [0, 1] for consistency with `Math.random()`.
+7. The `/random` endpoint now sends the generated secure random number as a response.
