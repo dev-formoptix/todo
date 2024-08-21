@@ -19,7 +19,7 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+    const query = `SELECT * FROM users WHERE id = ${mysql.escape(userId)}`; // Use mysql.escape to prevent SQL injection
     connection.query(query, (err, results) => {
         if (err) throw err;
         res.send(results);
@@ -29,7 +29,8 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
+    const cleanedCmd = cmd.replace(/[`$();&|]+/g, ''); // Clean user-provided input to prevent command injection
+    exec(cleanedCmd, (err, stdout, stderr) => {
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
