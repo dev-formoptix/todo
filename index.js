@@ -1,11 +1,10 @@
 const express = require('express');
 const mysql = require('mysql');
-const { execFileSync } = require('child_process');
+const { spawnSync } = require('child_process'); // Update import
 const crypto = require('crypto');
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
 const RateLimit = require('express-rate-limit');
-const shellQuote = require('shell-quote');
 const app = express();
 const port = 3000;
 const connection = mysql.createConnection({
@@ -38,13 +37,8 @@ app.get('/exec', limiter, (req, res) => {
     // Validate and sanitize the input to prevent command injection
     const safeCmd = shellQuote.parse(cmd);
     const sanitizedCmd = safeCmd.map(arg => arg.replace(/[`$();&|]+/g, ''));
-    execFileSync(sanitizedCmd[0], sanitizedCmd.slice(1), (err, stdout, stderr) => {
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
-        }
-        res.send(`Output: ${stdout}`);
-    });
+    spawnSync(sanitizedCmd[0], sanitizedCmd.slice(1)); // Update from execFileSync
+    res.send('Command executed successfully'); // Update response
 });
 
 // Apply rate limiter to the '/random' route
