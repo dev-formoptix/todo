@@ -1,5 +1,3 @@
-Here's the updated code:
-
 ```javascript
 const express = require('express');
 const mysql = require('mysql');
@@ -34,7 +32,8 @@ app.get('/user', (req, res) => {
 app.use(mongoSanitize());
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
+    const cleanedCmd = cmd.replace(/[`$();&|]+/g, ''); // Clean the user-provided command
+    exec(cleanedCmd, (err, stdout, stderr) => { // Vulnerable to command injection
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
