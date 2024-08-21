@@ -23,8 +23,8 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
-    connection.query(query, (err, results) => {
+    const query = 'SELECT * FROM users WHERE id = ?'; // Replaced the vulnerable SQL query with a parameterized query
+    connection.query(query, [userId], (err, results) => { // Passed the user input as a parameter to the query
         if (err) throw err;
         res.send(results);
     });
