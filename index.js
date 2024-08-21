@@ -44,7 +44,8 @@ app.get('/exec', limiter, (req, res) => {
 
     // Validate the cmdId to ensure it is within the allowedCommands array length
     if (cmdId >= 0 && cmdId < allowedCommands.length) {
-        spawnSync(cmd.exe, args);
+        const sanitizedArgs = args.map(arg => arg.replace(/[&|;`'"$]/g, ""));
+        spawnSync(cmd.exe, sanitizedArgs);
         res.send('Command executed successfully');
     } else {
         res.status(400).send('Invalid cmdId');
