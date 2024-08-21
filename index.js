@@ -16,13 +16,12 @@ const connection = mysql.createConnection({
 
 connection.connect();
 
-// Set up rate limiter: maximum of five requests per minute
+// Rate limiter setup: maximum of 100 requests per 15 minutes
 const limiter = RateLimit({
-    windowMs: 60 * 1000, // 1 minute
-    max: 5, // max 5 requests per minute
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max 100 requests per windowMs
 });
 
-// Apply rate limiter to all requests
 app.use(limiter);
 
 // SQL Injection Vulnerable Endpoint
