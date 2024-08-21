@@ -39,11 +39,11 @@ app.get('/exec', limiter, (req, res) => {
         { exe: "/bin/ping", args: ["-c", "1", "--"] },
         { exe: "/bin/host", args: ["--"] }
     ];
-    const cmd = allowedCommands[cmdId];
-    const args = host ? cmd.args.concat(host) : cmd.args; // Check if host is provided
-
+  
     // Validate the cmdId to ensure it is within the allowedCommands array length
     if (cmdId >= 0 && cmdId < allowedCommands.length) {
+        const cmd = allowedCommands[cmdId];
+        const args = host ? cmd.args.concat(host) : cmd.args; // Check if host is provided
         const sanitizedArgs = args.map(arg => arg.replace(/[&|;`'"$]/g, ""));
         spawnSync(cmd.exe, sanitizedArgs);
         res.send('Command executed successfully');
