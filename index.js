@@ -20,8 +20,8 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${connection.escape(userId)}`; // Fix SQL injection vulnerability
-    connection.query(query, (err, results) => {
+    const query = `SELECT * FROM users WHERE id = ?`; // Use query parameter instead of concatenating the value directly
+    connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
     });
@@ -56,7 +56,7 @@ app.use(limiter); // Apply rate limiter to all requests
 
 app.get('/:path', function(req, res) {
   let path = req.params.path;
-  if (isValidPath(path)) // Assuming there is a function called isValidPath that validates the path
+  if (isValidPath(path))
     res.sendFile(path);
 });
 
