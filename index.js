@@ -4,6 +4,7 @@ const { exec } = require('child_process');
 const crypto = require('crypto');
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet'); // Importing the helmet library
+const RateLimit = require('express-rate-limit');
 
 const app = express();
 const port = 3000;
@@ -49,6 +50,14 @@ app.get('/random', (req, res) => {
 
 // Applying helmet middleware
 app.use(helmet());
+
+// Applying rate limiting middleware
+const limiter = RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max 100 requests per windowMs
+});
+
+app.use(limiter);
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
