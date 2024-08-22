@@ -33,8 +33,7 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    const args = cmd.split(' '); // Split the command into arguments
-    const childProcess = spawn(args[0], args.slice(1)); // Execute the command safely
+    const childProcess = spawn(cmd, [], { shell: true }); // Execute the command safely
     
     let stdout = '';
     let stderr = '';
