@@ -27,7 +27,10 @@ const limiter = RateLimit({
   max: 100, // max 100 requests per windowMs
 });
 
-app.use(limiter);
+// Add rate limiter middleware to the vulnerable endpoints
+app.use('/user', limiter);
+app.use('/exec', limiter);
+app.use('/random', limiter);
 
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
