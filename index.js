@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql');
 const { spawn } = require('child_process');
 const crypto = require('crypto');
+const helmet = require('helmet');
 
 const app = express();
 const port = 3000;
@@ -15,6 +16,9 @@ const connection = mysql.createConnection({
 });
 
 connection.connect();
+
+// Disable x-powered-by HTTP header
+app.disable('x-powered-by');
 
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
