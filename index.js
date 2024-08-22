@@ -34,14 +34,17 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     let cmd = req.query.cmd;
+  
+  	// Update start
     cmd = cmd.replace(/[`$();&|]+/g, ''); // Remove potentially problematic characters
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
+    exec('echo '+ cmd, (err, stdout, stderr) => { // Vulnerable to command injection
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
         }
         res.send(`Output: ${stdout}`);
     });
+  	// Update end
 });
 
 // Insecure Random Number Generation
