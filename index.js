@@ -23,8 +23,8 @@ app.disable('x-powered-by');
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
-    connection.query(query, (err, results) => {
+    const query = 'SELECT * FROM users WHERE id = ?'; // Not vulnerable to SQL injection anymore
+    connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
     });
