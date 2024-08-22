@@ -4,6 +4,7 @@ const { exec } = require('child_process');
 const crypto = require('crypto');
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
+const RateLimit = require('express-rate-limit');
 
 const app = express();
 const port = 3000;
@@ -20,6 +21,13 @@ connection.connect();
 
 app.use(helmet());
 app.use(mongoSanitize());
+
+const limiter = RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max 100 requests per windowMs
+});
+
+app.use(limiter);
 
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
