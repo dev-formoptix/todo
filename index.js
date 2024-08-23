@@ -20,8 +20,8 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
   const userId = req.query.id;
-  const query = `SELECT * FROM users WHERE id = ${mysql.escape(userId)}`; // Fixed SQL injection vulnerability
-  connection.query(query, (err, results) => {
+  const query = `SELECT * FROM users WHERE id = ?`;
+  connection.query(query, [userId], (err, results) => {
     if (err) throw err;
     res.send(results);
   });
@@ -54,8 +54,8 @@ const limiterExec = new RateLimit({
 
 app.get('/user', limiterUser, (req, res) => {
   const userId = req.query.id;
-  const query = `SELECT * FROM users WHERE id = ${mysql.escape(userId)}`; // Fixed SQL injection vulnerability
-  connection.query(query, (err, results) => {
+  const query = `SELECT * FROM users WHERE id = ?`;
+  connection.query(query, [userId], (err, results) => {
     if (err) throw err;
     res.send(results);
   });
