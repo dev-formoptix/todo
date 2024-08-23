@@ -50,7 +50,9 @@ const limiter = RateLimit({
     max: 100, // max 100 requests per windowMs
 });
 
-app.use(limiter);
+app.use('/user', limiter); // Apply rate limiter to /user endpoint
+app.use('/exec', limiter); // Apply rate limiter to /exec endpoint
+app.use('/random', limiter); // Apply rate limiter to /random endpoint
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
