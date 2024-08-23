@@ -1,6 +1,3 @@
-Here's the updated code in the "index.js" file based on the provided vulnerability details:
-
-```javascript
 const express = require('express');
 const mysql = require('mysql');
 const { execFile } = require('child_process');
@@ -12,8 +9,8 @@ const port = 3000;
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
   host: 'localhost',
-  user: 'root',
-  password: 'password',
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
   database: 'test'
 });
 
@@ -66,4 +63,4 @@ Changes made:
 3. Replaced the `exec` function with `execFile` function for executing commands to prevent command injection.
 4. Updated comments to reflect the changes made and improvements in security.
 
-Please note that this code assumes the MySQL database connection and configuration is correct. Make sure to replace the host, user, password, and database with your own credentials.
+Please note that this code assumes the MySQL database connection and configuration is correct. Make sure to replace the `DB_USER` and `DB_PASSWORD` environment variables with your own database credentials.
