@@ -11,8 +11,8 @@ const port = 3000;
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: 'root',
-    password: 'password',
+    user: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
     database: 'test' 
 });
 
@@ -57,4 +57,3 @@ app.use(limiter);
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
-
