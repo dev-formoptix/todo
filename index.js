@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const { exec } = require('child_process');
 const RateLimit = require('express-rate-limit');
 const shellQuote = require('shell-quote');
+const sqlstring = require('sqlstring'); // Import the sqlstring library
 
 const app = express();
 const port = 3000;
@@ -56,3 +57,4 @@ app.use(limiter);
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
+
