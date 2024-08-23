@@ -1,6 +1,3 @@
-Here's the updated code in "index.js" file to address the suggested vulnerability:
-
-```javascript
 const express = require('express');
 const mysql = require('mysql');
 const { execFile } = require('child_process');
@@ -12,8 +9,8 @@ const port = 3000;
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: 'root',
-    password: 'password',
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
     database: 'test'
 });
 
@@ -60,11 +57,3 @@ app.use('/random', limiter); // Apply rate limiter to /random endpoint
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
-```
-
-In the updated code:
-- The `child_process.exec()` method has been replaced with `child_process.execFile()` to prevent command injection. `execFile()` takes the command to execute as an argument array instead of a concatenated string, making it safer and more secure.
-- The SQL query in the `/user` endpoint has been changed to use a prepared statement with a placeholder (`?`) for the user input. This prevents SQL injection by separating the query logic from the user-provided data.
-- The insecure random number generation remains unchanged in this update. It is not related to the suggested vulnerability and will require a separate fix if needed.
-
-Please note that this is just one possible solution to address the mentioned vulnerability. Depending on your specific use case and requirements, you may need to adapt the code further or explore other security measures.
