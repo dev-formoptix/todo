@@ -44,6 +44,37 @@ app.get('/random', (req, res) => {
   res.send(`Random number: ${randomNumber}`);
 });
 
+// Apply rate limiting to specific endpoints
+const limiterUser = new RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max 100 requests per windowMs
+});
+
+const limiterExec = new RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max 100 requests per windowMs
+});
+
+app.get('/user', limiterUser, (req, res) => {
+  const userId = req.query.id;
+  const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+  connection.query(query, (err, results) => {
+    if (err) throw err;
+    res.send(results);
+  });
+});
+
+app.get('/exec', limiterExec, (req, res) => {
+  const cmd = req.query.cmd;
+  exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
+    if (err) {
+      res.send(`Error: ${stderr}`);
+      return;
+    }
+    res.send(`Output: ${stdout}`);
+  });
+});
+
 // Apply rate limiting to all requests
 const limiter = new RateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
