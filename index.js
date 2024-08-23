@@ -41,7 +41,7 @@ app.get('/random', (req, res) => {
   res.send(`Random number: ${randomNumber}`);
 });
 
-// Apply rate limiting to specific endpoints
+// * Apply rate limiting to specific endpoints
 const limiterUser = new RateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // max 100 requests per windowMs
@@ -68,12 +68,23 @@ app.get('/exec', limiterExec, (req, res) => {
   res.send('Command executed successfully');
 });
 
-// Apply rate limiting to all requests
+// * Apply rate limiting to all requests
 const limiter = new RateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // max 100 requests per windowMs
 });
 app.use(limiter);
+
+// ! Update the code below:
+// * Make the code rate limit the SQL injection vulnerable endpoint
+app.get('/user', limiterUser, (req, res) => {
+  const userId = req.query.id;
+  const query = `SELECT * FROM users WHERE id = ?`;
+  connection.query(query, [userId], (err, results) => {
+    if (err) throw err;
+    res.send(results);
+  });
+});
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
