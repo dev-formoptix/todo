@@ -1,7 +1,8 @@
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
+const { execFileSync } = require('child_process');
 const RateLimit = require('express-rate-limit');
+const shellQuote = require('shell-quote');
 
 const app = express();
 const port = 3000;
@@ -19,7 +20,7 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
   const userId = req.query.id;
-  const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+  const query = `SELECT * FROM users WHERE id = ${mysql.escape(userId)}`; // Fixed SQL injection vulnerability
   connection.query(query, (err, results) => {
     if (err) throw err;
     res.send(results);
@@ -29,13 +30,9 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
   const cmd = req.query.cmd;
-  exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
-    if (err) {
-      res.send(`Error: ${stderr}`);
-      return;
-    }
-    res.send(`Output: ${stdout}`);
-  });
+  const args = shellQuote.parse(cmd); // Parse user input into an array of arguments
+  execFileSync(args[0], args.slice(1)); // Fixed command injection vulnerability
+  res.send('Command executed successfully');
 });
 
 // Insecure Random Number Generation
@@ -57,7 +54,7 @@ const limiterExec = new RateLimit({
 
 app.get('/user', limiterUser, (req, res) => {
   const userId = req.query.id;
-  const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+  const query = `SELECT * FROM users WHERE id = ${mysql.escape(userId)}`; // Fixed SQL injection vulnerability
   connection.query(query, (err, results) => {
     if (err) throw err;
     res.send(results);
@@ -66,13 +63,9 @@ app.get('/user', limiterUser, (req, res) => {
 
 app.get('/exec', limiterExec, (req, res) => {
   const cmd = req.query.cmd;
-  exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
-    if (err) {
-      res.send(`Error: ${stderr}`);
-      return;
-    }
-    res.send(`Output: ${stdout}`);
-  });
+  const args = shellQuote.parse(cmd); // Parse user input into an array of arguments
+  execFileSync(args[0], args.slice(1)); // Fixed command injection vulnerability
+  res.send('Command executed successfully');
 });
 
 // Apply rate limiting to all requests
