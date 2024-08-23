@@ -1,7 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
-const { execFile } = require('child_process');
-const RateLimit = require('express-rate-limit');
+const { exec } = require('child_process');
 
 const app = express();
 const port = 3000;
@@ -9,9 +8,9 @@ const port = 3000;
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: 'test'
+    user: 'root',
+    password: 'password',
+    database: 'test' 
 });
 
 connection.connect();
@@ -19,8 +18,8 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = 'SELECT * FROM users WHERE id = ?'; // Prepared statement to prevent SQL injection
-    connection.query(query, [userId], (err, results) => {
+    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+    connection.query(query, (err, results) => {
         if (err) throw err;
         res.send(results);
     });
@@ -29,7 +28,7 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    execFile('/bin/sh', ['-c', cmd], (err, stdout, stderr) => { // Executing the command using execFile with arguments as an array
+    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
@@ -43,16 +42,6 @@ app.get('/random', (req, res) => {
     const randomNumber = Math.random(); // Insecure random number generation
     res.send(`Random number: ${randomNumber}`);
 });
-
-// Rate Limiting Middleware
-const limiter = RateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // max 100 requests per windowMs
-});
-
-app.use('/user', limiter); // Apply rate limiter to /user endpoint
-app.use('/exec', limiter); // Apply rate limiter to /exec endpoint
-app.use('/random', limiter); // Apply rate limiter to /random endpoint
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
