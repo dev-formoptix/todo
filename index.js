@@ -1,16 +1,20 @@
 const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
+const dotenv = require('dotenv');
 
 const app = express();
 const port = 3000;
 
+// Load environment variables from a .env file
+dotenv.config();
+
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'passwordd',
-    database: 'test' 
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
 });
 
 connection.connect();
