@@ -49,7 +49,7 @@ app.get('/exec', (req, res) => {
 
 // Insecure Random Number Generation
 app.get('/random', (req, res) => {
-  const randomNumber = Math.random();
+  const randomNumber = crypto.randomInt(0, 100);
   res.send(`Random number: ${randomNumber}`);
 });
 
