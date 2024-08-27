@@ -18,8 +18,6 @@ const connection = mysql.createConnection({
 });
 connection.connect();
 
-app.use(helmet()); // Use Helmet to configure HTTP headers
-
 app.use(express.json()); // Parse JSON request bodies
 app.use(mongoSanitize()); // Sanitize user input for MongoDB queries
 
