@@ -1,10 +1,12 @@
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
-const { spawnSync } = require('child_process');
+const helmet = require("helmet");
 
 const app = express();
 const port = 3000;
+
+// Disable x-powered-by header
+app.disable("x-powered-by");
 
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
