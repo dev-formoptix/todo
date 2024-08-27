@@ -37,9 +37,10 @@ app.get('/exec', (req, res) => {
     res.send(`Output: ${commandOutput.stdout.toString()}`);
 });
 
-// Insecure Random Number Generation
+// Secure Random Number Generation
 app.get('/random', (req, res) => {
-    const randomNumber = Math.random(); // Insecure random number generation
+    const crypto = require('crypto');
+    const randomNumber = crypto.randomBytes(4).readUInt32LE(0) / Math.pow(2, 32); // Secure random number generation
     res.send(`Random number: ${randomNumber}`);
 });
 
