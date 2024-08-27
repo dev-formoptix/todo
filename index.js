@@ -34,7 +34,8 @@ app.get('/user', (req, res) => {
 app.get('/exec', (req, res) => {
   let cmd = req.query.cmd.split(' ');
   cmd = cmd.map((arg) => arg.replace(/[`$();&|]+/g, ''));
-  execFile(cmd[0], cmd.slice(1), (err, stdout, stderr) => {
++  cmd = cmd.join(' '); // Join the command arguments back into a string
+  execFile(cmd, (err, stdout, stderr) => { // Use execFile instead of exec
     if (err) {
       res.send(`Error: ${stderr}`);
       return;
@@ -65,7 +66,8 @@ app.get('/user', vulnerableLimiter, (req, res) => {
 app.get('/exec', vulnerableLimiter, (req, res) => {
   let cmd = req.query.cmd.split(' ');
   cmd = cmd.map((arg) => arg.replace(/[`$();&|]+/g, ''));
-  execFile(cmd[0], cmd.slice(1), (err, stdout, stderr) => {
++  cmd = cmd.join(' '); // Join the command arguments back into a string
+  execFile(cmd, (err, stdout, stderr) => { // Use execFile instead of exec
     if (err) {
       res.send(`Error: ${stderr}`);
       return;
