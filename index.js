@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql');
 const { execFile } = require('child_process');
 const RateLimit = require('express-rate-limit');
+const crypto = require('crypto');
 const app = express();
 const port = 3000;
 
@@ -41,7 +42,7 @@ app.get('/exec', (req, res) => {
 
 // Insecure Random Number Generation
 app.get('/random', (req, res) => {
-  const randomNumber = Math.random();
+  const randomNumber = crypto.randomInt(0, 100);
   res.send(`Random number: ${randomNumber}`);
 });
 
@@ -72,7 +73,7 @@ app.get('/exec', vulnerableLimiter, (req, res) => {
 
 // Secure Random Number Generation
 app.get('/random', (req, res) => {
-  const randomNumber = Math.random();
+  const randomNumber = crypto.randomInt(0, 100);
   res.send(`Random number: ${randomNumber}`);
 });
 
