@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const { execFile } = require('child_process');
 const RateLimit = require('express-rate-limit');
 const crypto = require('crypto');
+const helmet = require("helmet");
 const app = express();
 const port = 3000;
 
@@ -14,6 +15,8 @@ const connection = mysql.createConnection({
   database: 'test'
 });
 connection.connect();
+
+app.use(helmet()); // Use Helmet to configure HTTP headers
 
 app.use(express.json()); // Parse JSON request bodies
 
