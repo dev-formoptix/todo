@@ -4,6 +4,8 @@ const { execFile } = require('child_process');
 const RateLimit = require('express-rate-limit');
 const crypto = require('crypto');
 const helmet = require("helmet");
+const mongoSanitize = require('express-mongo-sanitize');
+
 const app = express();
 const port = 3000;
 
@@ -19,6 +21,7 @@ connection.connect();
 app.use(helmet()); // Use Helmet to configure HTTP headers
 
 app.use(express.json()); // Parse JSON request bodies
+app.use(mongoSanitize()); // Sanitize user input for MongoDB queries
 
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
@@ -34,7 +37,7 @@ app.get('/user', (req, res) => {
 app.get('/exec', (req, res) => {
   let cmd = req.query.cmd.split(' ');
   cmd = cmd.map((arg) => arg.replace(/[`$();&|]+/g, ''));
-+  cmd = cmd.join(' '); // Join the command arguments back into a string
+  cmd = cmd.join(' '); // Join the command arguments back into a string
   execFile(cmd, (err, stdout, stderr) => { // Use execFile instead of exec
     if (err) {
       res.send(`Error: ${stderr}`);
@@ -66,7 +69,7 @@ app.get('/user', vulnerableLimiter, (req, res) => {
 app.get('/exec', vulnerableLimiter, (req, res) => {
   let cmd = req.query.cmd.split(' ');
   cmd = cmd.map((arg) => arg.replace(/[`$();&|]+/g, ''));
-+  cmd = cmd.join(' '); // Join the command arguments back into a string
+  cmd = cmd.join(' '); // Join the command arguments back into a string
   execFile(cmd, (err, stdout, stderr) => { // Use execFile instead of exec
     if (err) {
       res.send(`Error: ${stderr}`);
