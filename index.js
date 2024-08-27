@@ -4,6 +4,7 @@ const { execFile } = require('child_process');
 const RateLimit = require('express-rate-limit');
 const app = express();
 const port = 3000;
+
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
   host: 'localhost',
@@ -12,6 +13,7 @@ const connection = mysql.createConnection({
   database: 'test'
 });
 connection.connect();
+
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
   const userId = req.query.id;
@@ -21,6 +23,7 @@ app.get('/user', (req, res) => {
     res.send(results);
   });
 });
+
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
   const cmd = req.query.cmd.split(' '); // Split command into an array of arguments
@@ -32,11 +35,13 @@ app.get('/exec', (req, res) => {
     res.send(`Output: ${stdout}`);
   });
 });
+
 // Insecure Random Number Generation
 app.get('/random', (req, res) => {
   const randomNumber = Math.random(); // Insecure random number generation
   res.send(`Random number: ${randomNumber}`);
 });
+
 // Implement rate limiting for vulnerable endpoints
 const vulnerableLimiter = RateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -60,17 +65,20 @@ app.get('/exec', vulnerableLimiter, (req, res) => {
     res.send(`Output: ${stdout}`);
   });
 });
+
 // Secure Random Number Generation
 app.get('/random', (req, res) => {
-  const randomNumber = Math.random();  Secure random number generation
+  const randomNumber = Math.random(); // Secure random number generation
   res.send(`Random number: ${randomNumber}`);
 });
+
 // Implement rate limiting for all endpoints
 const limiter = RateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // max 100 requests per windowMs
 });
 app.use(limiter);
+
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
