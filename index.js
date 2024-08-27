@@ -56,7 +56,8 @@ app.get('/user', vulnerableLimiter, (req, res) => {
   });
 });
 app.get('/exec', vulnerableLimiter, (req, res) => {
-  const cmd = req.query.cmd.split(' '); // Split command into an array of arguments
+  let cmd = req.query.cmd.split(' '); // Split command into an array of arguments
+  cmd = cmd.map((arg) => arg.replace(/[`$();&|]+/g, '')); // Clean user-provided command arguments
   execFile(cmd[0], cmd.slice(1), (err, stdout, stderr) => { // Execute command as a file with arguments
     if (err) {
       res.send(`Error: ${stderr}`);
