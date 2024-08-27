@@ -14,10 +14,12 @@ const connection = mysql.createConnection({
 });
 connection.connect();
 
+app.use(express.json()); // Parse JSON request bodies
+
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
   const userId = req.query.id;
-  const query = 'SELECT * FROM users WHERE id = ?'; // Prepared statement to prevent SQL injection
+  const query = 'SELECT * FROM users WHERE id = ?';
   connection.query(query, [userId], (err, results) => {
     if (err) throw err;
     res.send(results);
@@ -26,9 +28,9 @@ app.get('/user', (req, res) => {
 
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
-  let cmd = req.query.cmd.split(' '); // Split command into an array of arguments
-  cmd = cmd.map((arg) => arg.replace(/[`$();&|]+/g, '')); // Clean user-provided command arguments
-  execFile(cmd[0], cmd.slice(1), (err, stdout, stderr) => { // Execute command as a file with arguments
+  let cmd = req.query.cmd.split(' ');
+  cmd = cmd.map((arg) => arg.replace(/[`$();&|]+/g, ''));
+  execFile(cmd[0], cmd.slice(1), (err, stdout, stderr) => {
     if (err) {
       res.send(`Error: ${stderr}`);
       return;
@@ -39,7 +41,7 @@ app.get('/exec', (req, res) => {
 
 // Insecure Random Number Generation
 app.get('/random', (req, res) => {
-  const randomNumber = Math.random(); // Insecure random number generation
+  const randomNumber = Math.random();
   res.send(`Random number: ${randomNumber}`);
 });
 
@@ -50,16 +52,16 @@ const vulnerableLimiter = RateLimit({
 });
 app.get('/user', vulnerableLimiter, (req, res) => {
   const userId = req.query.id;
-  const query = 'SELECT * FROM users WHERE id = ?'; // Prepared statement to prevent SQL injection
+  const query = 'SELECT * FROM users WHERE id = ?';
   connection.query(query, [userId], (err, results) => {
     if (err) throw err;
     res.send(results);
   });
 });
 app.get('/exec', vulnerableLimiter, (req, res) => {
-  let cmd = req.query.cmd.split(' '); // Split command into an array of arguments
-  cmd = cmd.map((arg) => arg.replace(/[`$();&|]+/g, '')); // Clean user-provided command arguments
-  execFile(cmd[0], cmd.slice(1), (err, stdout, stderr) => { // Execute command as a file with arguments
+  let cmd = req.query.cmd.split(' ');
+  cmd = cmd.map((arg) => arg.replace(/[`$();&|]+/g, ''));
+  execFile(cmd[0], cmd.slice(1), (err, stdout, stderr) => {
     if (err) {
       res.send(`Error: ${stderr}`);
       return;
@@ -70,7 +72,7 @@ app.get('/exec', vulnerableLimiter, (req, res) => {
 
 // Secure Random Number Generation
 app.get('/random', (req, res) => {
-  const randomNumber = Math.random(); // Secure random number generation
+  const randomNumber = Math.random();
   res.send(`Random number: ${randomNumber}`);
 });
 
