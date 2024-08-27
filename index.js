@@ -49,7 +49,7 @@ app.get('/exec', (req, res) => {
 
 // Insecure Random Number Generation
 app.get('/random', (req, res) => {
-  const randomNumber = crypto.randomInt(0, 100);
+  const randomNumber = Math.random();  // Update to use Math.random() instead of crypto.randomInt(0, 100)
   res.send(`Random number: ${randomNumber}`);
 });
 
@@ -81,7 +81,7 @@ app.get('/exec', vulnerableLimiter, (req, res) => {
 
 // Secure Random Number Generation
 app.get('/random', (req, res) => {
-  const randomNumber = crypto.randomInt(0, 100);
+  const randomNumber = crypto.randomInt(0, 100);  // Update to use crypto.randomInt(0, 100)
   res.send(`Random number: ${randomNumber}`);
 });
 
