@@ -53,6 +53,27 @@ app.get('/random', (req, res) => {
     res.send(`Random number: ${randomNumber}`);
 });
 
+// Vulnerability Fix: Rate Limiting for Database Access
+const databaseLimiter = RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // max 10 requests per windowMs for database operations
+});
+app.use('/user', databaseLimiter);
+
+// Vulnerability Fix: Rate Limiting for Command Execution
+const commandLimiter = RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // max 5 requests per windowMs for command execution
+});
+app.use('/exec', commandLimiter);
+
+// Vulnerability Fix: Rate Limiting for Random Number Generation
+const randomLimiter = RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // max 20 requests per windowMs for random number generation
+});
+app.use('/random', randomLimiter);
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
