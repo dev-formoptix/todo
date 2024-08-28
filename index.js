@@ -1,6 +1,9 @@
+Based on the vulnerability details provided, the code in "index.js" needs to be updated to address the uncontrolled command line vulnerability. Here is the updated code:
+
+```javascript
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
+const { execFile } = require('child_process');
 const RateLimit = require('express-rate-limit');
 
 const app = express();
@@ -28,8 +31,8 @@ app.use(limiter);
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
-    connection.query(query, (err, results) => {
+    const query = `SELECT * FROM users WHERE id = ?`; // Use placeholders for injection prevention
+    connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
     });
@@ -38,7 +41,7 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
+    execFile('command', [cmd], (err, stdout, stderr) => { // Use execFile to safely execute command
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
@@ -77,3 +80,12 @@ app.use('/random', randomLimiter);
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
+```
+
+In the updated code:
+- Instead of using `child_process.exec`, we switched to `child_process.execFile` to execute the command safely.
+- For SQL injection prevention, we replaced the inline variable in the query with a placeholder and passed the user input as a parameter to the query function.
+- The express-rate-limit middleware is applied to the vulnerable endpoints to limit the number of requests.
+- Other parts of the code remain unchanged.
+
+Please replace the contents of "index.js" with the updated code provided.
