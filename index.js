@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const { exec } = require('child_process');
 const crypto = require('crypto');
 const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require('helmet');
 
 const app = express();
 const port = 3000;
@@ -32,7 +33,7 @@ app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
     // Sanitize cmd parameter to remove potentially problematic characters
     const sanitizedCmd = cmd.replace(/[`$();&|]+/g, '');
-    
+
     exec(sanitizedCmd, (err, stdout, stderr) => { // Vulnerable to command injection
         if (err) {
             res.send(`Error: ${stderr}`);
@@ -51,6 +52,7 @@ app.get('/random', (req, res) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(mongoSanitize()); // Apply MongoDB query sanitization middleware
+app.use(helmet());
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
