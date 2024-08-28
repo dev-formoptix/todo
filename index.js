@@ -1,49 +1,34 @@
 const express = require('express');
 const mysql = require('mysql');
-const { execFileSync } = require('child_process');
-const RateLimit = require('express-rate-limit');
+const { exec } = require('child_process');
+
 const app = express();
 const port = 3000;
-const crypto = require('crypto');
-const mongoSanitize = require('express-mongo-sanitize');
-const helmet = require("helmet");
-const shellQuote = require('shell-quote');
 
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
+    user: 'root',
+    password: 'passwordd',
     database: 'test' 
 });
 
 connection.connect();
 
 // SQL Injection Vulnerable Endpoint
-const sqlLimiter = RateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // max 100 requests per windowMs
-});
-
-app.get('/user', sqlLimiter, (req, res) => {
+app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = 'SELECT * FROM users WHERE id = ?';
-    connection.query(query, [userId], (err, results) => {
+    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+    connection.query(query, (err, results) => {
         if (err) throw err;
         res.send(results);
     });
 });
 
 // Command Injection Vulnerable Endpoint
-const commandLimiter = RateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // max 100 requests per windowMs
-});
-
-app.get('/exec', commandLimiter, (req, res) => {
+app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    const commandArguments = shellQuote.parse(cmd);
-    execFileSync(commandArguments[0], commandArguments.slice(1), (err, stdout, stderr) => {
+    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
@@ -53,17 +38,10 @@ app.get('/exec', commandLimiter, (req, res) => {
 });
 
 // Insecure Random Number Generation
-const randomLimiter = RateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // max 100 requests per windowMs
-});
-
-app.get('/random', randomLimiter, (req, res) => {
-    const randomNumber = crypto.randomInt(0, 100);
+app.get('/random', (req, res) => {
+    const randomNumber = Math.random(); // Insecure random number generation
     res.send(`Random number: ${randomNumber}`);
 });
-
-app.use(helmet());
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
