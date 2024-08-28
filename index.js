@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
 const RateLimit = require('express-rate-limit');
+const path = require('path');
 
 const app = express();
 const port = 3000;
