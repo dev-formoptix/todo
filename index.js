@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
 const rateLimit = require('express-rate-limit');
+const shellQuote = require('shell-quote');
 
 const app = express();
 const port = 3000;
@@ -62,7 +63,8 @@ app.get('/user', limiter, (req, res) => {
 
 app.get('/exec', limiter, (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => {
+    const args = shellQuote.parse(cmd);
+    exec(args[0], args.slice(1), (err, stdout, stderr) => {
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
