@@ -1,12 +1,13 @@
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
+const { execFileSync } = require('child_process');
 const RateLimit = require('express-rate-limit');
 const app = express();
 const port = 3000;
 const crypto = require('crypto');
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require("helmet");
+const shellQuote = require('shell-quote');
 
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
@@ -41,9 +42,8 @@ const commandLimiter = RateLimit({
 
 app.get('/exec', commandLimiter, (req, res) => {
     const cmd = req.query.cmd;
-    const commandArguments = cmd.split(" ");
-    const safeCommandArguments = commandArguments.map(arg => arg.replace(/[`$();&|]+/g, ''));
-    exec(safeCommandArguments[0], safeCommandArguments.slice(1), (err, stdout, stderr) => {
+    const commandArguments = shellQuote.parse(cmd);
+    execFileSync(commandArguments[0], commandArguments.slice(1), (err, stdout, stderr) => {
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
