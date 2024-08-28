@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
 const crypto = require('crypto');
+const mongoSanitize = require('express-mongo-sanitize');
 
 const app = express();
 const port = 3000;
@@ -19,7 +20,7 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+    const query = `SELECT * FROM users WHERE id = ${mysql.escape(userId)}`; // Escaping user input to prevent SQL injection
     connection.query(query, (err, results) => {
         if (err) throw err;
         res.send(results);
@@ -46,6 +47,10 @@ app.get('/random', (req, res) => {
     const randomNumber = crypto.randomInt(0, 100); // Secure random number generation
     res.send(`Random number: ${randomNumber}`);
 });
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(mongoSanitize()); // Apply MongoDB query sanitization middleware
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
