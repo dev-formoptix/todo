@@ -23,7 +23,7 @@ const sqlLimiter = RateLimit({
 
 app.get('/user', sqlLimiter, (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ?`; // Use parameters to prevent SQL Injection
+    const query = 'SELECT * FROM users WHERE id = ?'; // Use parameters to prevent SQL Injection
     connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
@@ -39,7 +39,8 @@ const commandLimiter = RateLimit({
 app.get('/exec', commandLimiter, (req, res) => {
     const cmd = req.query.cmd;
     const commandArguments = cmd.split(" "); // Split command into arguments
-    exec(commandArguments[0], commandArguments.slice(1), (err, stdout, stderr) => { // Use arguments array to execute command safely
+    const safeCommandArguments = commandArguments.map(arg => arg.replace(/[`$();&|]+/g, '')); // Clean arguments
+    exec(safeCommandArguments[0], safeCommandArguments.slice(1), (err, stdout, stderr) => { // Use cleaned arguments to execute command safely
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
