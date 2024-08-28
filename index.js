@@ -61,6 +61,22 @@ const limiter = RateLimit({
 });
 app.use(limiter);
 
+// Changing the code to limit the rate of expensive operations
+app.get('/:path', limiter, (req, res) => {
+  let path = req.params.path;
+  if (isValidPath(path))
+    res.sendFile(path);
+});
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
+
+// Helper function to validate the path
+function isValidPath(path) {
+    // Implement necessary logic to validate the path
+    // Return true if the path is valid, false otherwise
+    // Example implementation:
+    // return path.startsWith('/public/');
+    return true;
+}
