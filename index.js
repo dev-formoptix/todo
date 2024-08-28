@@ -1,6 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
+const { execFile } = require('child_process');
 const crypto = require('crypto');
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
@@ -31,10 +31,9 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    // Sanitize cmd parameter to remove potentially problematic characters
-    const sanitizedCmd = cmd.replace(/[`$();&|]+/g, '');
+    const args = [cmd]; // Use command arguments as an array of strings
 
-    exec(sanitizedCmd, (err, stdout, stderr) => { // Vulnerable to command injection
+    execFile('/bin/sh', args, (err, stdout, stderr) => { // Executing shell command with execFile
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
