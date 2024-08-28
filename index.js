@@ -6,6 +6,8 @@ const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
 const RateLimit = require('express-rate-limit');
 const path = require('path');
+const fs = require('fs');
+const { join } = require('path');
 
 const app = express();
 const port = 3000;
@@ -64,9 +66,15 @@ app.use(limiter);
 
 // Changing the code to limit the rate of expensive operations
 app.get('/:path', limiter, (req, res) => {
-  let path = req.params.path;
-  if (isValidPath(path))
-    res.sendFile(path);
+  let filePath = req.params.path;
+  const resolvedPath = path.resolve(filePath);
+  const indexFilePath = join(__dirname, 'index.html');
+
+  if (resolvedPath === indexFilePath) {
+    res.sendFile(resolvedPath);
+  } else {
+    res.status(403).send('Access denied');
+  }
 });
 
 app.listen(port, () => {
