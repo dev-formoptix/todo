@@ -23,8 +23,8 @@ const sqlLimiter = RateLimit({
 
 app.get('/user', sqlLimiter, (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${connection.escape(userId)}`; // Escaping input to prevent SQL Injection
-    connection.query(query, (err, results) => {
+    const query = `SELECT * FROM users WHERE id = ?`; // Use parameters to prevent SQL Injection
+    connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
     });
