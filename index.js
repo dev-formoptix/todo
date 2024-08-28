@@ -1,6 +1,7 @@
 const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
+const crypto = require('crypto');
 
 const app = express();
 const port = 3000;
@@ -10,7 +11,7 @@ const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: 'passwordd',
-    database: 'test' 
+    database: 'test'
 });
 
 connection.connect();
@@ -39,7 +40,7 @@ app.get('/exec', (req, res) => {
 
 // Insecure Random Number Generation
 app.get('/random', (req, res) => {
-    const randomNumber = Math.random(); // Insecure random number generation
+    const randomNumber = crypto.randomInt(0, 100); // Secure random number generation
     res.send(`Random number: ${randomNumber}`);
 });
 
