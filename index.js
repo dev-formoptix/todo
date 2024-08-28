@@ -1,35 +1,48 @@
-```javascript
-const app = require('express')();
-const pg = require('pg');
-const config = require('./config.json');
+const express = require('express');
+const mysql = require('mysql');
+const { exec } = require('child_process');
 
-const pool = new pg.Pool(config);
+const app = express();
+const port = 3000;
 
-app.get('/search', function handler(req, res) {
-  const category = req.query.category;
-
-  const query = {
-    text: 'SELECT ITEM, PRICE FROM PRODUCT WHERE ITEM_CATEGORY = $1 ORDER BY PRICE',
-    values: [category],
-  };
-
-  pool.query(query, function(err, results) {
-    if (err) {
-      console.error(err);
-      res.status(500).send('Internal Server Error');
-    } else {
-      // process results
-      res.send(results.rows);
-    }
-  });
+// MySQL connection setup (replace with your own credentials)
+const connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: 'passwordd',
+    database: 'test' 
 });
 
-app.listen(3000, function() {
-  console.log('Server listening on port 3000');
-});
-```
+connection.connect();
 
-In the updated code:
-- The SQL query is now constructed using query parameters (`$1`) instead of concatenating the user input directly into the query string. This prevents SQL injection attacks.
-- The user-provided category value is passed as an array of values (`[category]`) to the `pool.query` function, ensuring that it gets properly escaped and sanitized.
-- The server now listens on port 3000 for incoming requests.
+// SQL Injection Vulnerable Endpoint
+app.get('/user', (req, res) => {
+    const userId = req.query.id;
+    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+    connection.query(query, (err, results) => {
+        if (err) throw err;
+        res.send(results);
+    });
+});
+
+// Command Injection Vulnerable Endpoint
+app.get('/exec', (req, res) => {
+    const cmd = req.query.cmd;
+    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
+        if (err) {
+            res.send(`Error: ${stderr}`);
+            return;
+        }
+        res.send(`Output: ${stdout}`);
+    });
+});
+
+// Insecure Random Number Generation
+app.get('/random', (req, res) => {
+    const randomNumber = Math.random(); // Insecure random number generation
+    res.send(`Random number: ${randomNumber}`);
+});
+
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+});
