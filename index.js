@@ -4,7 +4,8 @@ const { exec } = require('child_process');
 const RateLimit = require('express-rate-limit');
 const app = express();
 const port = 3000;
-const mongoSanitize = require('express-mongo-sanitize'); // Import express-mongo-sanitize
+const crypto = require('crypto'); // Import crypto module
+const mongoSanitize = require('express-mongo-sanitize');
 
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
@@ -57,7 +58,7 @@ const randomLimiter = RateLimit({
 });
 
 app.get('/random', randomLimiter, (req, res) => {
-    const randomNumber = Math.random(); // Insecure random number generation
+    const randomNumber = crypto.randomInt(0, 100); // Use crypto.randomInt for secure random number generation
     res.send(`Random number: ${randomNumber}`);
 });
 
