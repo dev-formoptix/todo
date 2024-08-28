@@ -50,7 +50,28 @@ const limiter = rateLimit({
   max: 100, // max 100 requests per windowMs
 });
 
-// Apply Rate Limit Middleware to all requests
+// Apply Rate Limit Middleware to vulnerable endpoints
+app.get('/user', limiter, (req, res) => {
+    const userId = req.query.id;
+    const query = `SELECT * FROM users WHERE id = ${userId}`;
+    connection.query(query, (err, results) => {
+        if (err) throw err;
+        res.send(results);
+    });
+});
+
+app.get('/exec', limiter, (req, res) => {
+    const cmd = req.query.cmd;
+    exec(cmd, (err, stdout, stderr) => {
+        if (err) {
+            res.send(`Error: ${stderr}`);
+            return;
+        }
+        res.send(`Output: ${stdout}`);
+    });
+});
+
+// Apply Rate Limit Middleware to all other requests
 app.use(limiter);
 
 app.listen(port, () => {
