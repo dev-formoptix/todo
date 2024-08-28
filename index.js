@@ -4,8 +4,9 @@ const { exec } = require('child_process');
 const RateLimit = require('express-rate-limit');
 const app = express();
 const port = 3000;
-const crypto = require('crypto'); // Import crypto module
+const crypto = require('crypto');
 const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require("helmet");
 
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
@@ -25,7 +26,7 @@ const sqlLimiter = RateLimit({
 
 app.get('/user', sqlLimiter, (req, res) => {
     const userId = req.query.id;
-    const query = 'SELECT * FROM users WHERE id = ?'; // Use parameters to prevent SQL Injection
+    const query = 'SELECT * FROM users WHERE id = ?';
     connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
@@ -40,9 +41,9 @@ const commandLimiter = RateLimit({
 
 app.get('/exec', commandLimiter, (req, res) => {
     const cmd = req.query.cmd;
-    const commandArguments = cmd.split(" "); // Split command into arguments
-    const safeCommandArguments = commandArguments.map(arg => arg.replace(/[`$();&|]+/g, '')); // Clean arguments
-    exec(safeCommandArguments[0], safeCommandArguments.slice(1), (err, stdout, stderr) => { // Use cleaned arguments to execute command safely
+    const commandArguments = cmd.split(" ");
+    const safeCommandArguments = commandArguments.map(arg => arg.replace(/[`$();&|]+/g, ''));
+    exec(safeCommandArguments[0], safeCommandArguments.slice(1), (err, stdout, stderr) => {
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
@@ -58,9 +59,11 @@ const randomLimiter = RateLimit({
 });
 
 app.get('/random', randomLimiter, (req, res) => {
-    const randomNumber = crypto.randomInt(0, 100); // Use crypto.randomInt for secure random number generation
+    const randomNumber = crypto.randomInt(0, 100);
     res.send(`Random number: ${randomNumber}`);
 });
+
+app.use(helmet());
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
