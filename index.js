@@ -2,7 +2,6 @@ const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
 const RateLimit = require('express-rate-limit');
-
 const app = express();
 const port = 3000;
 
@@ -24,7 +23,7 @@ const sqlLimiter = RateLimit({
 
 app.get('/user', sqlLimiter, (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${mysql.escape(userId)}`; // Escaping input to prevent SQL Injection
+    const query = `SELECT * FROM users WHERE id = ${connection.escape(userId)}`; // Escaping input to prevent SQL Injection
     connection.query(query, (err, results) => {
         if (err) throw err;
         res.send(results);
@@ -39,7 +38,8 @@ const commandLimiter = RateLimit({
 
 app.get('/exec', commandLimiter, (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
+    const commandArguments = cmd.split(" "); // Split command into arguments
+    exec(commandArguments[0], commandArguments.slice(1), (err, stdout, stderr) => { // Use arguments array to execute command safely
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
