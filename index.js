@@ -4,6 +4,7 @@ const { exec } = require('child_process');
 const RateLimit = require('express-rate-limit');
 const app = express();
 const port = 3000;
+const mongoSanitize = require('express-mongo-sanitize'); // Import express-mongo-sanitize
 
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
