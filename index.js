@@ -8,9 +8,9 @@ const port = 3000;
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: 'root',
-    password: 'passwordd',
-    database: 'test' 
+    user: process.env.DBUSER,
+    password: process.env.DBPASSWORD,
+    database: 'test'
 });
 
 connection.connect();
