@@ -15,6 +15,18 @@ const connection = mysql.createConnection({
 
 connection.connect();
 
+// Importing the express-rate-limit package
+const RateLimit = require('express-rate-limit');
+
+// Setting up the rate limiter: maximum of five requests per minute
+const limiter = RateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 5, // max 5 requests per minute
+});
+
+// Applying the rate limiter to all requests
+app.use(limiter);
+
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
