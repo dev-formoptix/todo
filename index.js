@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const { exec } = require('child_process');
 const base64 = require('base-64');
 const RateLimit = require('express-rate-limit');
+const shellQuote = require('shell-quote');
 
 const app = express();
 const port = 3000;
@@ -20,7 +21,7 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+    const query = `SELECT * FROM users WHERE id = ${connection.escape(userId)}`; // Sanitize user input to prevent SQL injection
     connection.query(query, (err, results) => {
         if (err) throw err;
         res.send(results);
@@ -30,7 +31,8 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
+    const args = shellQuote.parse(cmd); // Split user input into an array of arguments
+    exec(args[0], args.slice(1), (err, stdout, stderr) => { // Use exec with an array of arguments to prevent command injection
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
@@ -53,7 +55,7 @@ const limiter = RateLimit({
 
 const databaseAccessHandler = (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+    const query = `SELECT * FROM users WHERE id = ${connection.escape(userId)}`; // Sanitize user input to prevent SQL injection
     connection.query(query, (err, results) => {
         if (err) throw err;
         res.send(results);
@@ -62,7 +64,8 @@ const databaseAccessHandler = (req, res) => {
 
 const commandExecutionHandler = (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
+    const args = shellQuote.parse(cmd); // Split user input into an array of arguments
+    exec(args[0], args.slice(1), (err, stdout, stderr) => { // Use exec with an array of arguments to prevent command injection
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
