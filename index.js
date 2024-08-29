@@ -6,9 +6,9 @@ const RateLimit = require('express-rate-limit');
 const shellQuote = require('shell-quote');
 
 const app = express();
-const port = 3000;
 
-// MySQL connection setup (replace with your own credentials)
+app.use(helmet());
+
 const connection = mysql.createConnection({
     host: 'localhost',
     user: process.env.DB_USER,
@@ -41,10 +41,13 @@ app.get('/exec', (req, res) => {
     });
 });
 
-// Insecure Random Number Generation
-app.get('/random', (req, res) => {
-    const randomNumber = Math.random(); // Insecure random number generation
-    res.send(`Random number: ${randomNumber}`);
+  connection.query(query, (error, results) => {
+    if (error) {
+      res.status(500).send('Error creating user');
+    } else {
+      res.status(201).send('User created successfully');
+    }
+  });
 });
 
 // Rate limiting middleware
