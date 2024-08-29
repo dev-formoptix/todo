@@ -21,8 +21,8 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${connection.escape(userId)}`; // Sanitize user input to prevent SQL injection
-    connection.query(query, (err, results) => {
+    const query = `SELECT * FROM users WHERE id = ?`; // Use query parameters to prevent SQL injection
+    connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
     });
@@ -55,8 +55,8 @@ const limiter = RateLimit({
 
 const databaseAccessHandler = (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${connection.escape(userId)}`; // Sanitize user input to prevent SQL injection
-    connection.query(query, (err, results) => {
+    const query = `SELECT * FROM users WHERE id = ?`; // Use query parameters to prevent SQL injection
+    connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
     });
