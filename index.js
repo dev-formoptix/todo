@@ -12,7 +12,7 @@ const connection = mysql.createConnection({
     host: 'localhost',
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    database: 'test' 
+    database: 'test'
 });
 
 connection.connect();
@@ -51,7 +51,35 @@ const limiter = RateLimit({
     max: 100, // max 100 requests per windowMs
 });
 
-app.use(limiter);
+const databaseAccessHandler = (req, res) => {
+    const userId = req.query.id;
+    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+    connection.query(query, (err, results) => {
+        if (err) throw err;
+        res.send(results);
+    });
+};
+
+const commandExecutionHandler = (req, res) => {
+    const cmd = req.query.cmd;
+    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
+        if (err) {
+            res.send(`Error: ${stderr}`);
+            return;
+        }
+        res.send(`Output: ${stdout}`);
+    });
+};
+
+app.get('/user', limiter, databaseAccessHandler);
+
+app.get('/exec', limiter, commandExecutionHandler);
+
+// Insecure Random Number Generation
+app.get('/random', limiter, (req, res) => {
+    const randomNumber = Math.random(); // Insecure random number generation
+    res.send(`Random number: ${randomNumber}`);
+});
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
