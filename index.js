@@ -55,6 +55,18 @@ app.get('/random', (req, res) => {
     res.send(`Random number: ${randomNumber}`);
 });
 
+// Adding rate limiting to the vulnerable endpoints
+
+const vulnerableEndpoints = ['/user', '/exec', '/random'];
+
+app.use((req, res, next) => {
+    if (vulnerableEndpoints.includes(req.path)) {
+        limiter(req, res, next);
+    } else {
+        next();
+    }
+});
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
