@@ -1,19 +1,16 @@
 const express = require('express');
 const mysql = require('mysql');
 const { exec } = require('child_process');
-const base64 = require('base-64');
-const RateLimit = require('express-rate-limit');
-const shellQuote = require('shell-quote');
 
 const app = express();
+const port = 3000;
 
-app.use(helmet());
-
+// MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: 'test'
+    user: 'root',
+    password: 'passwordd',
+    database: 'test' 
 });
 
 connection.connect();
@@ -21,8 +18,8 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ?`; // Use query parameters to prevent SQL injection
-    connection.query(query, [userId], (err, results) => {
+    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+    connection.query(query, (err, results) => {
         if (err) throw err;
         res.send(results);
     });
@@ -31,8 +28,7 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    const args = shellQuote.parse(cmd); // Split user input into an array of arguments
-    exec(args[0], args.slice(1), (err, stdout, stderr) => { // Use exec with an array of arguments to prevent command injection
+    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
@@ -40,49 +36,9 @@ app.get('/exec', (req, res) => {
         res.send(`Output: ${stdout}`);
     });
 });
-
-  connection.query(query, (error, results) => {
-    if (error) {
-      res.status(500).send('Error creating user');
-    } else {
-      res.status(201).send('User created successfully');
-    }
-  });
-});
-
-// Rate limiting middleware
-const limiter = RateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // max 100 requests per windowMs
-});
-
-const databaseAccessHandler = (req, res) => {
-    const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ?`; // Use query parameters to prevent SQL injection
-    connection.query(query, [userId], (err, results) => {
-        if (err) throw err;
-        res.send(results);
-    });
-};
-
-const commandExecutionHandler = (req, res) => {
-    const cmd = req.query.cmd;
-    const args = shellQuote.parse(cmd); // Split user input into an array of arguments
-    exec(args[0], args.slice(1), (err, stdout, stderr) => { // Use exec with an array of arguments to prevent command injection
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
-        }
-        res.send(`Output: ${stdout}`);
-    });
-};
-
-app.get('/user', limiter, databaseAccessHandler);
-
-app.get('/exec', limiter, commandExecutionHandler);
 
 // Insecure Random Number Generation
-app.get('/random', limiter, (req, res) => {
+app.get('/random', (req, res) => {
     const randomNumber = Math.random(); // Insecure random number generation
     res.send(`Random number: ${randomNumber}`);
 });
