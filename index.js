@@ -44,12 +44,12 @@ app.get('/random', (req, res) => {
     res.send(`Random number: ${randomNumber}`);
 });
 
-// Apply rate limiter to all requests
+// Apply rate limiter to vulnerable endpoints
 const limiter = RateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100, // max 100 requests per windowMs
 });
-app.use(limiter);
+app.use(['/user', '/exec'], limiter);
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
