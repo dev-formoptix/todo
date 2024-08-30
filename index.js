@@ -49,6 +49,17 @@ app.get('/random', limiter, (req, res) => {
     res.send(`Random number: ${randomNumber}`);
 });
 
+// Database Access Endpoint
+app.get('/data', limiter, (req, res) => {
+    const data = getData(); // Perform database access
+    res.send(data);
+});
+
+function getData() {
+    // Perform database query to get data
+    return "Some data from the database";
+}
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
