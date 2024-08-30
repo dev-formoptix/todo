@@ -38,7 +38,7 @@ app.get('/user', dbLimiter, (req, res) => {
     });
 });
 
-app.get('/exec', (req, res) => {
+app.get('/exec', dbLimiter, (req, res) => { // Added rate limiting middleware for /exec route
     const cmd = req.query.cmd;
     const args = shellQuote.parse(cmd); // Use shell-quote to parse the command into an array of arguments
     
@@ -62,7 +62,7 @@ app.get('/exec', (req, res) => {
     }
 });
 
-app.get('/random', (req, res) => {
+app.get('/random', dbLimiter, (req, res) => { // Added rate limiting middleware for /random route
     const randomNumber = Math.random(); // Insecure random number generation
     res.send(`Random number: ${randomNumber}`);
 });
