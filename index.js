@@ -3,9 +3,13 @@ const mysql = require('mysql');
 const { exec } = require('child_process');
 const crypto = require('crypto');
 const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require("helmet");
 
 const app = express();
 const port = 3000;
+
+// Apply Helmet middleware
+app.use(helmet());
 
 // MySQL connection setup (replace with your own credentials)
 const connection = mysql.createConnection({
