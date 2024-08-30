@@ -47,7 +47,7 @@ const limiter = RateLimit({
 });
 app.use(limiter);
 
-// Updated: This route handler performs a database access, but is now rate-limited.
+// Fixed: This route handler performs a database access, but is now using query parameters to prevent SQL injection.
 app.get('/user/:id', (req, res) => {
     const userId = req.params.id;
     const query = 'SELECT * FROM users WHERE id = ?';
