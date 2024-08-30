@@ -52,6 +52,21 @@ const limiter = RateLimit({
 
 app.use(limiter);
 
+// Rate limiting middleware for database access
+const dbLimiter = RateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10, // max 10 requests per windowMs for database access
+});
+
+app.get('/user', dbLimiter, (req, res) => {
+    const userId = req.query.id;
+    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+    connection.query(query, (err, results) => {
+        if (err) throw err;
+        res.send(results);
+    });
+});
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
