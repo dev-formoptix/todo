@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const { execFileSync } = require('child_process');
 const RateLimit = require('express-rate-limit');
 const shellQuote = require('shell-quote');
+const crypto = require('crypto');
 
 const app = express();
 const port = 3000;
@@ -36,7 +37,7 @@ app.get('/exec', (req, res) => {
 
 // Insecure Random Number Generation
 app.get('/random', (req, res) => {
-    const randomNumber = Math.random(); // Insecure random number generation
+    const randomNumber = crypto.randomInt(0, 100); // Use secure random number generation
     res.send(`Random number: ${randomNumber}`);
 });
 
