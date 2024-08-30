@@ -56,8 +56,8 @@ const limiter = RateLimit({
   max: 5 // max 5 requests per minute
 });
 
-// apply rate limiter to all requests
-app.use(limiter);
+// apply rate limiter to vulnerable endpoints
+app.use(['/user', '/exec', '/random'], limiter);
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
