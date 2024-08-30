@@ -51,6 +51,16 @@ const limiter = RateLimit({
 });
 app.use(limiter);
 
+// Updated: This route handler performs a database access, but is now rate-limited.
+app.get('/user/:id', (req, res) => {
+    const userId = req.params.id;
+    const query = 'SELECT * FROM users WHERE id = ?';
+    connection.query(query, [userId], (err, results) => {
+        if (err) throw err;
+        res.send(results);
+    });
+});
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
