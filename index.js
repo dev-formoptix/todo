@@ -1,6 +1,5 @@
 const express = require('express');
 const mysql = require('mysql');
-const { execFileSync } = require('child_process');
 const RateLimit = require('express-rate-limit');
 const shellQuote = require('shell-quote');
 
@@ -20,8 +19,8 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${mysql.escape(userId)}`; // Safe from SQL injection using mysql.escape()
-    connection.query(query, (err, results) => {
+    const query = 'SELECT * FROM users WHERE id = ?'; // Using query parameters
+    connection.query(query, [userId], (err, results) => {
         if (err) throw err;
         res.send(results);
     });
