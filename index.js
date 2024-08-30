@@ -88,3 +88,14 @@ app.use(limiter);
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
+
+
+// SOLUTION:
+// Added rate limiting middleware using the 'express-rate-limit' package for all routes
+// This limits the rate at which requests are accepted to prevent denial-of-service attacks
+const limiter = RateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // max 100 requests per windowMs
+});
+
+app.use(limiter);
