@@ -25,8 +25,8 @@ const limiter = RateLimit({
 // SQL Injection Vulnerable Endpoint
 app.get('/user', limiter, (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
-    connection.query(query, (err, results) => {
+    const query = `SELECT * FROM users WHERE id = ?`; // Fixed query to use parameterized query
+    connection.query(query, [userId], (err, results) => { // Pass user input as a parameter
         if (err) throw err;
         res.send(results);
     });
@@ -36,7 +36,7 @@ app.get('/user', limiter, (req, res) => {
 app.get('/exec', limiter, (req, res) => {
     const cmd = req.query.cmd;
     const cmdArgs = shellQuote.parse(cmd); // Parse user input into an array of arguments
-    exec(cmdArgs, (err, stdout, stderr) => { // Execute the command safely
+    exec(cmdArgs.join(" "), (err, stdout, stderr) => { // Execute the command safely
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
