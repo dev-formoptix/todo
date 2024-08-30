@@ -52,6 +52,7 @@ app.get('/random', limiter, (req, res) => {
 });
 
 // Database Access Endpoint
+// Updated code to include rate limiting
 app.get('/data', limiter, (req, res) => {
     const data = getData(); // Perform database access
     res.send(data);
