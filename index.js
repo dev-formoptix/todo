@@ -40,13 +40,6 @@ app.get('/random', (req, res) => {
     res.send(`Random number: ${randomNumber}`);
 });
 
-// Rate limiter
-const limiter = RateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // max 100 requests per windowMs
-});
-app.use(limiter);
-
 // Fixed: This route handler performs a database access, but is now using query parameters to prevent SQL injection.
 app.get('/user/:id', (req, res) => {
     const userId = req.params.id;
