@@ -1,7 +1,8 @@
 const express = require('express');
 const mysql = require('mysql');
-const { exec } = require('child_process');
+const { execFileSync } = require('child_process');
 const RateLimit = require('express-rate-limit');
+const shellQuote = require('shell-quote');
 
 const app = express();
 const port = 3000;
@@ -19,7 +20,7 @@ connection.connect();
 // SQL Injection Vulnerable Endpoint
 app.get('/user', (req, res) => {
     const userId = req.query.id;
-    const query = `SELECT * FROM users WHERE id = ${userId}`; // Vulnerable to SQL injection
+    const query = `SELECT * FROM users WHERE id = ${mysql.escape(userId)}`; // Safe from SQL injection using mysql.escape()
     connection.query(query, (err, results) => {
         if (err) throw err;
         res.send(results);
@@ -29,13 +30,13 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
-        if (err) {
-            res.send(`Error: ${stderr}`);
-            return;
-        }
-        res.send(`Output: ${stdout}`);
-    });
+    const cmdArgs = shellQuote.parse(cmd); // Parsing the user input using shell-quote
+    try {
+        const output = execFileSync(cmdArgs[0], cmdArgs.slice(1)); // Executing the command using execFileSync
+        res.send(`Output: ${output}`);
+    } catch (err) {
+        res.send(`Error: ${err.message}`);
+    }
 });
 
 // Insecure Random Number Generation
