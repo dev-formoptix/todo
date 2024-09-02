@@ -29,7 +29,9 @@ app.get('/user', (req, res) => {
 // Command Injection Vulnerable Endpoint
 app.get('/exec', (req, res) => {
     const cmd = req.query.cmd;
-    exec(cmd, (err, stdout, stderr) => { // Vulnerable to command injection
+    // Fixing the vulnerability by cleaning user-provided data
+    const cleanedCmd = cmd.replace(/[`$();&|]+/g, '');
+    exec(cleanedCmd, (err, stdout, stderr) => {
         if (err) {
             res.send(`Error: ${stderr}`);
             return;
