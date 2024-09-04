@@ -51,3 +51,4 @@ jobs:
             -Dsonar.projectKey=dev-formoptix_todo
             -Dsonar.organization=dev-formoptix
           projectBaseDir: .
+ 
