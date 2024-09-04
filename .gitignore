@@ -24,7 +24,6 @@ yarn-error.log*
 
 # Unconfigured Editors
 .idea
-*.suo
 *.ntvs*
 *.njsproj
 *.sln
